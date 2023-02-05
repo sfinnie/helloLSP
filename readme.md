@@ -1,10 +1,12 @@
 # Hello LSP - an incremental introduction to the Language Server Protocol
 
+***Work in Progress***
+
 The [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) (LSP) provides a way to build editor services for a language that aren't tied to a specific editor or IDE.  [VSCode](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide), [neovim](https://neovim.io/doc/user/lsp.html) and [emacs](https://www.emacswiki.org/emacs/LanguageServerProtocol) all support the LSP at time of writing, meaning a single LSP implementation can be used in all 3 editors.  Actually, that's not quite true.  Whilst the server component of an LSP implementation can be used as-is, each editor has a slightly different way of integrating the LSP server into the editor.  This example focuses on vscode - so the client is vscode specific and written in typescript.  The server is in python.
 
 ## Overview
 
-There are overviews of the LSP on [Microsoft's official site](https://microsoft.github.io/language-server-protocol/, the [community site](https://langserver.org/) and others too.
+There are overviews of the LSP on [Microsoft's official site](https://microsoft.github.io/language-server-protocol/), the [community site](https://langserver.org/) and others too.
 
 The [LSP spec](https://microsoft.github.io/language-server-protocol/specifications/specification-current/) summarises it thus:
 
@@ -15,7 +17,7 @@ That's good enough for here; there's plenty more at the sites above.  We'll focu
 
 ## The Language
 
-If we're to implement a *language server*, we need a language.  Real language servers deal with programming languages.  Implementing programming languages is an entire body of theory and practice in itself and that's not the objective here (though, if that's your bag, you could do a lot worse that starting with Bob Nystrom's [Crafting Interpreters](https://craftinginterpreters.com/)).  
+If we're to implement a language *server*, we need a *language*.  Real language servers deal with programming languages.  Implementing programming languages is an entire body of theory and practice in itself and that's not the objective here (though, if that's your bag, you could do a lot worse that starting with Bob Nystrom's [Crafting Interpreters](https://craftinginterpreters.com/)).  
 
 Thankfully we don't need anythong approaching the complexity of a real programming language to implement a language server: we can use something simpler instead.  *Much* simpler, in fact.  Let's call the language *greet*: it's only purpose is to express simple greetings.  First, a couple of examples:
 
@@ -26,9 +28,11 @@ That's it.  Each phrase consists of just two words: a *salutation* - "hello" or 
 
 [^1]: It's common to formally describe the syntax of a programming language with a grammar, often defined in *Backus-Naur Format* (BNF).  See e.g. [wikipedia](https://en.wikipedia.org/wiki/Syntax_(programming_languages) for more information.
 
+```bnf
     greeting    :: salutation name
     salutation  :: 'Hello' | 'Goodbye'
     name        :: [a-zA-Z]+
+```
 
 In words, that says:
 
@@ -107,7 +111,7 @@ Here's a typical response (again from the [official docs](https://microsoft.gith
 
 Again, fairly explanatory:
 
-* the `id` is used to correlate the response with the request.  The user might have changed their mind and started typing again, in which case the editor needs to know it can discard the response.
+* the `id` is used to correlate the response with the request.  The user might, for example, have changed their mind and started typing again, in which case the editor needs to know it can discard the response.
 * the `result` contains the response to the request.  It says:
   * The definition of the symbol in the request is contained in the `uri`.  Note it's a different file to uri in the request.
   * The `start` and `end` define the line & column positions that delimit the definition.  For example, this could be the name of the function being referenced.  
@@ -121,19 +125,20 @@ OK, enough of the talking - let's code.  There are [many](https://microsoft.gith
 
 ### Pre-Requisites
 
-We're using VSCode as the editor, so you need to [install it first](https://code.visualstudio.com/download).  You'll also need to install [git](https://git-scm.com/) and [Node.js](https://nodejs.org/).Then create a new directory to hold the project:
+We're using VSCode as the editor, so you need to [install it first](https://code.visualstudio.com/download).  You'll also need to install [git](https://git-scm.com/),   [Node.js](https://nodejs.org/) and [Python](https://www.python.org/downloads/).  Then create a new directory to hold the project:
 
 ```bash
 $ cd /my/projects/dir
-$ mkdir hellolsp 
-$ cd hellolsp
+$ mkdir helloLSP 
+$ cd helloLSP
 ```
 
 ### Client Skeleton
-VSCode prescribes the shape of an extension, and there's a fair amount of boilerplate to create and navigate.  Fortunately, there's some tooling to bootstrap that.  What follows is based on the guidance [here](https://code.visualstudio.com/api/get-started/your-first-extension) and is correct as of 2023-02-02.  First, install the extension generator tools.  They use [Yeoman](https://yeoman.io/) so you need that too.
+VSCode prescribes the shape of an extension, and there's a fair amount of boilerplate to create and navigate.  Fortunately, there's some tooling to bootstrap that.  What follows is based on the guidance [here](https://code.visualstudio.com/api/get-started/your-first-extension) and is correct as of 2023-02-02.  First, install the extension generator tools.  They use [Yeoman](https://yeoman.io/) and [Typescript](https://www.typescriptlang.org/download) so you need those too.
 
 ```bash
 $ npm install -g yo generator-code
+$ npm install -g typescript --save-dev
 ```
 
 Now let's generate the client skeleton.

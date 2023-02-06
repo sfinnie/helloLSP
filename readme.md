@@ -29,9 +29,9 @@ That's it.  Each phrase consists of just two words: a *salutation* - "hello" or 
 [^1]: It's common to formally describe the syntax of a programming language with a grammar, often defined in *Backus-Naur Format* (BNF).  See e.g. [wikipedia](https://en.wikipedia.org/wiki/Syntax_(programming_languages) for more information.
 
 ```bnf
-    greeting    :: salutation name
-    salutation  :: 'Hello' | 'Goodbye'
-    name        :: [a-zA-Z]+
+    greeting    ::= salutation name
+    salutation  ::= 'Hello' | 'Goodbye'
+    name        ::= [a-zA-Z]+
 ```
 
 In words, that says:

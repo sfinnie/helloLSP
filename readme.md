@@ -121,7 +121,7 @@ It's entirely up to the server to decide what constitutes the definition.  Note,
 <a name="implementation-ovewrview"></a>
 ## Implementation Overview
 
-OK, enough of the talking - let's code.  There are [many](https://microsoft.github.io/language-server-protocol/implementors/servers/) [examples](https://github.com/openlawlibrary/pygls/tree/master/examples) [available](https://github.com/microsoft/vscode-python-tools-extension-template) and reading them is worthwhile.  Here, though, we'll build things from the ground up.
+OK, enough of the talking - let's code.  There are [many](https://microsoft.github.io/language-server-protocol/implementors/servers/) [examples](https://github.com/openlawlibrary/pygls/tree/master/examples) [available](https://github.com/microsoft/vscode-python-tools-extension-template) and reading them is worthwhile.
 
 ### Pre-Requisites
 
@@ -133,49 +133,49 @@ $ mkdir helloLSP
 $ cd helloLSP
 ```
 
-### Client Skeleton
-VSCode prescribes the shape of an extension, and there's a fair amount of boilerplate to create and navigate.  Fortunately, there's some tooling to bootstrap that.  What follows is based on the guidance [here](https://code.visualstudio.com/api/get-started/your-first-extension) and is correct as of 2023-02-02.  First, install the extension generator tools.  They use [Yeoman](https://yeoman.io/) and [Typescript](https://www.typescriptlang.org/download) so you need those too.
+There's a fair bit of boilerplate that needs to be in place before we can really get started on the implementing support for `greet`.  It's a bit fiddly and difficult to get right from first principles.  However, luckily, we don't need to. I used [this example](https://github.com/openlawlibrary/pygls/tree/master/examples/json-vscode-extension) as a template.  
 
-```bash
-$ npm install -g yo generator-code
-$ npm install -g typescript --save-dev
-```
+To build initially and check it's working:
 
-Now let's generate the client skeleton.
+1. Set up the Server Python environment
 
-```text
-$ yo code
+    ```bash
+    $ python -m venv venv
+    $ source venv/scripts/activate
+    $ python -m pip install -U pip
+    $ python -m pip install pygls
+    ```
 
-     _-----_     ╭──────────────────────────╮
-    |       |    │   Welcome to the Visual  │
-    |--(o)--|    │   Studio Code Extension  │
-   `---------´   │        generator!        │
-    ( _´U`_ )    ╰──────────────────────────╯
-    /___A___\   /
-     |  ~  |
-   __'.___.'__
- ´   `  |° ´ Y `
+1. Set up the client nodejs environment
 
-? What type of extension do you want to create? New Extension (TypeScript)
-? What's the name of your extension? HelloLSP
-? What's the identifier of your extension? hellolsp
-? What's the description of your extension? an exploration of building a language server and client
-? Initialize a git repository? No
-? Bundle the source code with webpack? No
-? Which package manager to use? npm
+    ```bash
+    $ npm install
+    $ cd client
+    $ npm install
+    $ cd ..
+    ```
 
-...
+1. Start vscode in the project root dir
 
-$ 
-```
+    ```bash
+    $ code .
+    ```
 
-That will create a new directory, `hellolsp`, containing the skeleton extension.  Let's rename that so the client and server are clear:
+1. Edit [.vscode/settings.json](vscode/settings.json) to ensure the python interpreter path is set correctly:
 
-```bash
-$ mv hellolsp client
-```
+    ```json
+    {
+        "python.interpreterPath": "${workspaceFolder}/.venv/Scripts/python"
+    }
+    ```
 
+1. Run the extension client and server in a separate "development" instance of vscode by typing `ctrl-shift-D`, selecting `Server + Client` in the "Launch" dropdown at the top of the screen, and hitting `F5`.
 
+1. In the development instance of vscode, open the `samples` sub-directory of this project.
+
+1. Open one of the sample files.  The ditor should show an information message at the bottom of the main window that says "Text Document Did Open".
+
+With that done, the basics are all in place.  Close the development instance for now and go back to the main project instance.  
 
 
 <a name="language-implementation"></a>

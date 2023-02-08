@@ -143,6 +143,39 @@ $ npm install -g typescript --save-dev
 
 Now let's generate the client skeleton.
 
+```text
+$ yo code
+
+     _-----_     ╭──────────────────────────╮
+    |       |    │   Welcome to the Visual  │
+    |--(o)--|    │   Studio Code Extension  │
+   `---------´   │        generator!        │
+    ( _´U`_ )    ╰──────────────────────────╯
+    /___A___\   /
+     |  ~  |
+   __'.___.'__
+ ´   `  |° ´ Y `
+
+? What type of extension do you want to create? New Extension (TypeScript)
+? What's the name of your extension? HelloLSP
+? What's the identifier of your extension? hellolsp
+? What's the description of your extension? an exploration of building a language server and client
+? Initialize a git repository? No
+? Bundle the source code with webpack? No
+? Which package manager to use? npm
+
+...
+
+$ 
+```
+
+That will create a new directory, `hellolsp`, containing the skeleton extension.  Let's rename that so the client and server are clear:
+
+```bash
+$ mv hellolsp client
+```
+
+
 
 
 <a name="language-implementation"></a>

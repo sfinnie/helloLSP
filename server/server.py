@@ -57,8 +57,8 @@ class GreetLanguageServer(LanguageServer):
 greet_server = GreetLanguageServer('pygls-json-example', 'v0.1')
 
 
-def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams):
-    ls.show_message_log('Validating json...')
+def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams | DidChangeTextDocumentParams):
+    ls.show_message_log('Parsing greeting...')
 
     text_doc = ls.workspace.get_document(params.text_document.uri)
 
@@ -69,7 +69,7 @@ def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams):
 
 
 def _parse_greet(source: str):
-    """Validates json file."""
+    """Parses a greeting file."""
     diagnostics = []
 
     lines = [line.rstrip() for line in source.splitlines()]
@@ -85,6 +85,17 @@ def _parse_greet(source: str):
                     source=type(greet_server).__name__
                 )
             diagnostics.append(d)
+        if tokens[0] != "Hello" and tokens[0] != "Goodbye":
+            d = Diagnostic(
+                    range=Range(
+                        start=Position(line=line_num, character=0),
+                        end=Position(line=line_num, character=len(tokens[0]))
+                    ),
+                    message="Greeting must start with either 'Hello' or 'Goodbye'",
+                    source=type(greet_server).__name__
+                )
+            diagnostics.append(d)
+
 
     return diagnostics
 

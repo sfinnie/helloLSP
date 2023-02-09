@@ -130,7 +130,7 @@ It's entirely up to the server to decide what constitutes the definition.  Note,
 
 ## Implementation Skeleton
 
-OK, enough of the talking - let's code.  There are [many](https://microsoft.github.io/language-server-protocol/implementors/servers/) [examples](https://github.com/openlawlibrary/pygls/tree/master/examples) [available](https://github.com/microsoft/vscode-python-tools-extension-template) and reading some is worthwhile to get a sense of what's involved.
+OK, enough of the talking - let's code.  
 
 ### Pre-Requisites
 
@@ -142,7 +142,7 @@ $ mkdir helloLSP
 $ cd helloLSP
 ```
 
-There's a fair bit of boilerplate that needs to be in place before we can really get started on the implementing support for `greet`.  It's a bit fiddly and difficult to get right from first principles.  However, luckily, we don't need to. I used [this example](https://github.com/openlawlibrary/pygls/tree/master/examples/json-vscode-extension) as a template.  
+There's a fair bit of boilerplate that needs to be in place before we can really get started on the implementing support for `greet`.  It's a bit fiddly and difficult to get right from first principles.  However, luckily, we don't need to. I used [this example](https://github.com/openlawlibrary/pygls/tree/master/examples/json-vscode-extension) as a template.  There are [many](https://microsoft.github.io/language-server-protocol/implementors/servers/) [examples](https://github.com/openlawlibrary/pygls/tree/master/examples) [available](https://github.com/microsoft/vscode-python-tools-extension-template) and reading some others too is worthwhile to get a sense of what's involved.
 
 To build initially and check it's working:
 

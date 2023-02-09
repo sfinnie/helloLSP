@@ -55,6 +55,8 @@ As per the introduction, the solution comprises 2 parts:
   * liaise between the editor and the server
 * the *server* provides the smarts on the language (as per the overview quote [above](#lsp-overview))
 
+Though vscode calls these "extensions", I'm going to use "plugin" from here on in.  The reason is that "extension" is also used when referring to filenames (e.g. the `.py` part in `file.py`).  We need to refer to both, so I'll use `plugin` for the things that provide language support, and `extension` specifically when referring to file names.
+
 ### Client-Server Interaction
 
 The client and server communicate using the language server protocol itself.  It defines two types of interactions:
@@ -176,13 +178,13 @@ To build initially and check it's working:
 
 1. In the development instance of vscode, open the `samples` sub-directory of this project.
 
-1. Open one the sample json file.  The editor should show an information message at the bottom of the main window that says "Text Document Did Open".
+1. Open the sample json file.  The editor should show an information message at the bottom of the main window that says "Text Document Did Open".
 
 With that done, the basics are all in place.  Close the development instance for now and go back to the main project instance.  The code at this point is [tagged as v0.1](https://github.com/sfinnie/helloLSP/releases/tag/v0.1) if you want to have a look.
 
-## Anatomy of the Extension
+## Anatomy of the Plugin
 
-Despite all the boilerplate, there are 3 primary files that implement the extension: one each for the client and server:
+Despite all the boilerplate, there are 3 primary files that implement the plugin:
 
 * [client/src/extension.ts](client/src/extension.ts) implements the client
 * [server/server.py](server/server.py) implements the server.
@@ -194,15 +196,15 @@ Despite all the boilerplate, there are 3 primary files that implement the extens
 
 With the skeleton in place, we can start making the changes needed to support our `greet` language.   There are a few things to do:
 
-1. Change the extension so it's activated on files with a `.greet` extension (the skeleton is activated for `json` files)
+1. Change the plugin so it's activated on files with a `.greet` extension (the skeleton is activated for `json` files)
 1. Get rid of the extraneous commands supported by the skeleton that we don't need.
 1. Implement the language 
 
 ### Tiny baby steps
 
-Let's start with the language extension.  There's actually 2 parts to this, because vscode separate language *identity* from the filename *extension*.  That allows multiple extensions to use the same identity, and so the same tooling.  For example: the Java tooling support both `.jav` and `.java` extensions.
+Let's start with the filrname extension.  There's actually 2 parts to this, because vscode separates language *identity* from the filename *extension*.  That allows a single language to support multiple extensions.  For example: the Java tooling supports both `.jav` and `.java` extensions.
 
-It's configured in the `package.json` file.  The relevant section in the skeleton reads as follows:
+The language and extension(s) are configured in the `package.json` file.  The relevant section in the skeleton reads as follows:
 
 ```json
 "activationEvents": [
@@ -210,7 +212,7 @@ It's configured in the `package.json` file.  The relevant section in the skeleto
   ],
 ```
 
-We need to make a few changes.  For a start, the skeleton assumes vscode already knows about `json` as a language.  It won't know anything about `greet`.  So we need to define the language identity, define the file extensions, and let vscode know when the activate our extension.  Here's what that looks like[^4]
+We need to make a few changes.  For a start, the skeleton assumes vscode already knows about `json` as a language.  It won't know anything about `greet` though.  So we need to define the language identity, define the file extensions, and let vscode know when to activate our plugin.  Here's what that looks like[^4]
 
 [^4]: It's not strictly necessary to include the `activationEvents` section: vscode infers that from language contributions in recent versions.  There's no downsides to doing so though, and means the extension will work with older versions of vscode.
 
@@ -234,9 +236,5 @@ We need to make a few changes.  For a start, the skeleton assumes vscode already
   ],
 ```
 
-With that changed, we can launch the extension in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
+With that changed, we can launch the plugin in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
 
-
-
-
-TODO

@@ -241,7 +241,7 @@ With that changed, we can launch the plugin in a development window again (`ctrl
 
 ### Cleaning up 
 
-The skeleton extension implement multiple commands for illustration.  We don't need them here, so they can be removed.  That needs changes in 2 places:
+The skeleton plugin implements multiple commands for illustration.  We don't need them here, so they can be removed.  If you run the plugin in a development instance and type `ctrl-shift-p` then enter "countdown" in the dialogue box, you should see several options like "Count down 10 seconds [blocking]".  We don't need those. That needs changes in 2 places:
 
 * `package.json`, which declares the commands the plugin supports
 * `server.py` which implements them.
@@ -279,8 +279,22 @@ def count_down_10_seconds_blocking(ls, *args):
 The link between the two is the `countdownBlocking` literal.  Removing the unnecessary commands requires removing:
 
 1. the "commands" entry in `package.json`
-1. The corresponding entry in the `JsonLanguageServer` class
+1. The corresponding constant definition in the `JsonLanguageServer` class
 1. The python function that implements the class
+
+We'll remove the configuration and code for the following commands:
+
+* countDownBlocking
+* CountDownNonBlocking
+* showConfigurationAsync
+* showConfigurationCallback
+* showConfigurationThread
+
+Launching the development instance, typing `ctrl-shift-p` and entering "countdown" now doesn't show up our commands.  Task complete.
+
+## Naming: enough, already, Json
+
+
 
 
 # To Do

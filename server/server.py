@@ -44,13 +44,8 @@ COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
 
 class JsonLanguageServer(LanguageServer):
-    CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
-    CMD_COUNT_DOWN_NON_BLOCKING = 'countDownNonBlocking'
     CMD_PROGRESS = 'progress'
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
-    CMD_SHOW_CONFIGURATION_ASYNC = 'showConfigurationAsync'
-    CMD_SHOW_CONFIGURATION_CALLBACK = 'showConfigurationCallback'
-    CMD_SHOW_CONFIGURATION_THREAD = 'showConfigurationThread'
     CMD_UNREGISTER_COMPLETIONS = 'unregisterCompletions'
 
     CONFIGURATION_SECTION = 'jsonServer'
@@ -111,28 +106,6 @@ def completions(params: Optional[CompletionParams] = None) -> CompletionList:
             CompletionItem(label='}'),
         ]
     )
-
-
-@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
-def count_down_10_seconds_blocking(ls, *args):
-    """Starts counting down and showing message synchronously.
-    It will `block` the main thread, which can be tested by trying to show
-    completion items.
-    """
-    for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
-        time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
-
-
-@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_NON_BLOCKING)
-async def count_down_10_seconds_non_blocking(ls, *args):
-    """Starts counting down and showing message asynchronously.
-    It won't `block` the main thread, which can be tested by trying to show
-    completion items.
-    """
-    for i in range(COUNT_DOWN_START_IN_SECONDS):
-        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
-        await asyncio.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
 
 
 @json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -231,66 +204,6 @@ async def register_completions(ls: JsonLanguageServer, *args):
                         MessageType.Error)
 
 
-@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_ASYNC)
-async def show_configuration_async(ls: JsonLanguageServer, *args):
-    """Gets exampleConfiguration from the client settings using coroutines."""
-    try:
-        config = await ls.get_configuration_async(
-            WorkspaceConfigurationParams(items=[
-                ConfigurationItem(
-                    scope_uri='',
-                    section=JsonLanguageServer.CONFIGURATION_SECTION)
-        ]))
-
-        example_config = config[0].get('exampleConfiguration')
-
-        ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
-
-    except Exception as e:
-        ls.show_message_log(f'Error ocurred: {e}')
-
-
-@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_CALLBACK)
-def show_configuration_callback(ls: JsonLanguageServer, *args):
-    """Gets exampleConfiguration from the client settings using callback."""
-    def _config_callback(config):
-        try:
-            example_config = config[0].get('exampleConfiguration')
-
-            ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
-
-        except Exception as e:
-            ls.show_message_log(f'Error ocurred: {e}')
-
-    ls.get_configuration(
-        WorkspaceConfigurationParams(
-            items=[
-                ConfigurationItem(
-                    scope_uri='',
-                    section=JsonLanguageServer.CONFIGURATION_SECTION)
-            ]
-        ),
-        _config_callback
-    )
-
-
-@json_server.thread()
-@json_server.command(JsonLanguageServer.CMD_SHOW_CONFIGURATION_THREAD)
-def show_configuration_thread(ls: JsonLanguageServer, *args):
-    """Gets exampleConfiguration from the client settings using thread pool."""
-    try:
-        config = ls.get_configuration(WorkspaceConfigurationParams(items=[
-            ConfigurationItem(
-                scope_uri='',
-                section=JsonLanguageServer.CONFIGURATION_SECTION)
-        ])).result(2)
-
-        example_config = config[0].get('exampleConfiguration')
-
-        ls.show_message(f'jsonServer.exampleConfiguration value: {example_config}')
-
-    except Exception as e:
-        ls.show_message_log(f'Error ocurred: {e}')
 
 
 @json_server.command(JsonLanguageServer.CMD_UNREGISTER_COMPLETIONS)

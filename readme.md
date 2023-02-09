@@ -470,9 +470,9 @@ It's pretty self-explanatory.  The `@greet_server.feature` line is where `pygls`
 [^6]: the underscore is a convention to indicate that `validate()` is a function only intended for use inside `server.py`.  
 
 
-The skeleton `_validate()` function checks whether the file is valid `json` so we need to change that.  The compiler world tends to talk about *parsing* rather than *validating*.  It's a bit pedantic, but I'm going to stick to that here.  So the functions we'll look at are named `_parse()` not `_validate()`.  
+The skeleton `_validate()` function checks whether the file is valid `json` so we need to change that.  The compiler world tends to talk about *parsing* rather than *validating*.  It's a bit pedantic, but I'm going to stick to that here.  So the functions we'll look at are named `_parse()` not `_validate()`.  The skeleton functions cover the following:
 
-1. Extracting the source file name from the paramers and reading its contents
+1. Extracting the source file name from the parameters and reading its contents
 1. Checking the contents
 
 We'll stick to that.  The first function doesn't change (other than the name):
@@ -519,7 +519,7 @@ def _parse_greet(source):
 
 The majority of the code deals with creating the `Diagnostic` - the data structure that informs the editor where the error lies, and what the problem is.
 
-Python's standard library doesn't have a built-in function for loading `.greet` files.  There's lots of well-established [theory](https://en.wikipedia.org/wiki/Parsing) on parsing, several techniques, and lots of libraries to support it.  That's a bit overkill for our needs.  Our approach is broadly:
+Not unreasonably, Python's standard library doesn't have a built-in function for loading `.greet` files.  There's lots of well-established [theory](https://en.wikipedia.org/wiki/Parsing) on parsing, several techniques, and lots of libraries to support it.  That's a bit overkill for our needs.  Our approach is broadly:
 
 1. Read in the file, breaking it up into lines
 1. For each line, check if it contains a valid greeting:

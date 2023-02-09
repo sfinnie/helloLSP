@@ -57,40 +57,55 @@ class GreetLanguageServer(LanguageServer):
 greet_server = GreetLanguageServer('pygls-json-example', 'v0.1')
 
 
-def _parse(ls, params):
+def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams):
     ls.show_message_log('Validating json...')
 
     text_doc = ls.workspace.get_document(params.text_document.uri)
 
     source = text_doc.source
-    diagnostics = _validate_json(source) if source else []
+    diagnostics = _parse_greet(source) if source else []
 
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
-def _validate_json(source):
+def _parse_greet(source: str):
     """Validates json file."""
     diagnostics = []
 
-    try:
-        json.loads(source)
-    except JSONDecodeError as err:
-        msg = err.msg
-        col = err.colno
-        line = err.lineno
-
-        d = Diagnostic(
-            range=Range(
-                start=Position(line=line - 1, character=col - 1),
-                end=Position(line=line - 1, character=col)
-            ),
-            message=msg,
-            source=type(greet_server).__name__
-        )
-
-        diagnostics.append(d)
+    lines = [line.rstrip() for line in source.splitlines()]
+    for line_num, line_contents in enumerate(lines):
+        tokens = line_contents.split()
+        if len(tokens) != 2:
+            d = Diagnostic(
+                    range=Range(
+                        start=Position(line=line_num, character=0),
+                        end=Position(line=line_num, character=len(line_contents))
+                    ),
+                    message="Greeting must have form <salutation> <name>, e.g. Hello Martha",
+                    source=type(greet_server).__name__
+                )
+            diagnostics.append(d)
 
     return diagnostics
+
+    # try:
+    #     json.loads(source)
+    # except JSONDecodeError as err:
+    #     msg = err.msg
+    #     col = err.colno
+    #     line = err.lineno
+
+    #     d = Diagnostic(
+    #         range=Range(
+    #             start=Position(line=line - 1, character=col - 1),
+    #             end=Position(line=line - 1, character=col)
+    #         ),
+    #         message=msg,
+    #         source=type(greet_server).__name__
+    #     )
+
+    #     diagnostics.append(d)
+
 
 
 @greet_server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))

@@ -198,9 +198,10 @@ With the skeleton in place, we can start making the changes needed to support ou
 
 1. Change the plugin so it's activated on files with a `.greet` extension (the skeleton is activated for `json` files)
 1. Get rid of the extraneous commands supported by the skeleton that we don't need.
+1. Rename the relevant classes, methods and names from `json` to `greet`
 1. Implement the language 
 
-### Tiny baby steps
+### Tiny baby steps - setting the language
 
 Let's start with the filrname extension.  There's actually 2 parts to this, because vscode separates language *identity* from the filename *extension*.  That allows a single language to support multiple extensions.  For example: the Java tooling supports both `.jav` and `.java` extensions.
 
@@ -237,4 +238,54 @@ We need to make a few changes.  For a start, the skeleton assumes vscode already
 ```
 
 With that changed, we can launch the plugin in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
+
+### Cleaning up 
+
+The skeleton extension implement multiple commands for illustration.  We don't need them here, so they can be removed.  That needs changes in 2 places:
+
+* `package.json`, which declares the commands the plugin supports
+* `server.py` which implements them.
+
+Here's an excerpt from each.
+
+```json
+//package.json
+    "commands": [
+      {
+        "command": "countDownBlocking",
+        "title": "Count down 10 seconds [Blocking]"
+      },
+      // several more
+    ]
+```
+
+```python
+class JsonLanguageServer(LanguageServer):
+    CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
+    # several more
+ 
+@json_server.command(JsonLanguageServer.CMD_COUNT_DOWN_BLOCKING)
+def count_down_10_seconds_blocking(ls, *args):
+    """Starts counting down and showing message synchronously.
+    It will `block` the main thread, which can be tested by trying to show
+    completion items.
+    """
+    for i in range(COUNT_DOWN_START_IN_SECONDS):
+        ls.show_message(f'Counting down... {COUNT_DOWN_START_IN_SECONDS - i}')
+        time.sleep(COUNT_DOWN_SLEEP_IN_SECONDS)
+
+```
+
+The link between the two is the `countdownBlocking` literal.  Removing the unnecessary commands requires removing:
+
+1. the "commands" entry in `package.json`
+1. The corresponding entry in the `JsonLanguageServer` class
+1. The python function that implements the class
+
+
+# To Do
+
+1. Testing
+1. Adding more language features: o to definition, suggestions, others
+1. Implement a more realistic language, possibly using tree sitter to parse.
 

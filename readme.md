@@ -237,11 +237,37 @@ We need to make a few changes.  For a start, the skeleton assumes vscode already
   ],
 ```
 
-With that changed, we can launch the plugin in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
+It's also referenced in [extension.ts](client/src/extension.ts):
+
+```typescript
+function getClientOptions(): LanguageClientOptions {
+    return {
+        // Register the server for plain text documents
+        documentSelector: [
+            { scheme: "file", language: "json" },
+            { scheme: "untitled", language: "json" },
+        ],
+    //...
+```
+
+We need to change that to:
+
+```typescript
+function getClientOptions(): LanguageClientOptions {
+    return {
+        // Register the server for plain text documents
+        documentSelector: [
+            { scheme: "file", language: "greet" },
+            { scheme: "untitled", language: "greet" },
+        ],
+    //...
+```
+
+With those changed, we can launch the plugin in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
 
 ### Cleaning up 
 
-The skeleton plugin implements multiple commands for illustration.  We don't need them here, so they can be removed.  If you run the plugin in a development instance and type `ctrl-shift-p` then enter "countdown" in the dialogue box, you should see several options like "Count down 10 seconds [blocking]".  We don't need those. That needs changes in 2 places:
+The skeleton plugin implements multiple commands for illustration.  We don't need them here, so they can be removed.  If you run the plugin in a development instance and type `ctrl-shift-p` then enter "countdown" in the dialogue box, you should see several options like "Count down 10 seconds [Blocking]".  We don't need those. That needs changes in 2 places:
 
 * `package.json`, which declares the commands the plugin supports
 * `server.py` which implements them.
@@ -294,12 +320,15 @@ Launching the development instance, typing `ctrl-shift-p` and entering "countdow
 
 ## Naming: enough, already, Json
 
+The skeleton is based on suport for `json` files, and that's used throughout [extension.ts](./client/src/extension.ts), [server.py](server/server.py) and [package.json](package.json).
+
 
 
 
 # To Do
 
 1. Testing
+1. Packaging and deploying
 1. Adding more language features: o to definition, suggestions, others
 1. Implement a more realistic language, possibly using tree sitter to parse.
 

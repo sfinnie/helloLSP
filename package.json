@@ -1,11 +1,11 @@
 {
-  "name": "json-extension",
-  "description": "Simple json extension example",
-  "author": "Open Law Library",
-  "repository": "https://github.com/openlawlibrary/pygls",
-  "license": "Apache-2.0",
-  "version": "0.11.3",
-  "publisher": "openlawlibrary",
+    "name": "greet",
+    "description": "Support for the greet salutation language",
+    "author": "sfinnie",
+    "repository": "https://github.com/sfinnie/helloLSP",
+    "license": "Apache-2.0",
+    "version": "0.0.1",
+    "publisher": "sfinnie",
   "engines": {
     "vscode": "^1.62.0"
   },
@@ -43,16 +43,16 @@
       }
     ],
     "configuration": {
-      "type": "object",
-      "title": "Json Server Configuration",
-      "properties": {
-        "jsonServer.exampleConfiguration": {
-          "scope": "resource",
-          "type": "string",
-          "default": "You can override this message."
+        "type": "object",
+        "title": "Greet Server Configuration",
+        "properties": {
+          "greetServer.exampleConfiguration": {
+            "scope": "resource",
+            "type": "string",
+            "default": "Greet says you can override this message."
+          }
         }
       }
-    }
   },
   "main": "./client/out/extension",
   "scripts": {

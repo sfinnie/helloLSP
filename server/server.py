@@ -43,7 +43,7 @@ COUNT_DOWN_START_IN_SECONDS = 10
 COUNT_DOWN_SLEEP_IN_SECONDS = 1
 
 
-class JsonLanguageServer(LanguageServer):
+class GreetLanguageServer(LanguageServer):
     CMD_PROGRESS = 'progress'
     CMD_REGISTER_COMPLETIONS = 'registerCompletions'
     CMD_UNREGISTER_COMPLETIONS = 'unregisterCompletions'
@@ -54,10 +54,10 @@ class JsonLanguageServer(LanguageServer):
         super().__init__(*args)
 
 
-json_server = JsonLanguageServer('pygls-json-example', 'v0.1')
+greet_server = GreetLanguageServer('pygls-json-example', 'v0.1')
 
 
-def _validate(ls, params):
+def _parse(ls, params):
     ls.show_message_log('Validating json...')
 
     text_doc = ls.workspace.get_document(params.text_document.uri)
@@ -85,7 +85,7 @@ def _validate_json(source):
                 end=Position(line=line - 1, character=col)
             ),
             message=msg,
-            source=type(json_server).__name__
+            source=type(greet_server).__name__
         )
 
         diagnostics.append(d)
@@ -93,7 +93,7 @@ def _validate_json(source):
     return diagnostics
 
 
-@json_server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
+@greet_server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
 def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     """Returns completion items."""
     return CompletionList(
@@ -108,33 +108,33 @@ def completions(params: Optional[CompletionParams] = None) -> CompletionList:
     )
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_CHANGE)
+@greet_server.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls, params: DidChangeTextDocumentParams):
     """Text document did change notification."""
-    _validate(ls, params)
+    _parse(ls, params)
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_CLOSE)
-def did_close(server: JsonLanguageServer, params: DidCloseTextDocumentParams):
+@greet_server.feature(TEXT_DOCUMENT_DID_CLOSE)
+def did_close(server: GreetLanguageServer, params: DidCloseTextDocumentParams):
     """Text document did close notification."""
     server.show_message('Text Document Did Close')
 
 
-@json_server.feature(TEXT_DOCUMENT_DID_OPEN)
+@greet_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
     ls.show_message('Text Document Did Open')
-    _validate(ls, params)
+    _parse(ls, params)
 
 
-@json_server.feature(
+@greet_server.feature(
     TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
     SemanticTokensLegend(
         token_types = ["operator"],
         token_modifiers = []
     )
 )
-def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
+def semantic_tokens(ls: GreetLanguageServer, params: SemanticTokensParams):
     """See https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens
     for details on how semantic tokens are encoded."""
 
@@ -168,8 +168,8 @@ def semantic_tokens(ls: JsonLanguageServer, params: SemanticTokensParams):
 
 
 
-@json_server.command(JsonLanguageServer.CMD_PROGRESS)
-async def progress(ls: JsonLanguageServer, *args):
+@greet_server.command(GreetLanguageServer.CMD_PROGRESS)
+async def progress(ls: GreetLanguageServer, *args):
     """Create and start the progress on the client."""
     token = str(uuid.uuid4())
     # Create
@@ -187,8 +187,8 @@ async def progress(ls: JsonLanguageServer, *args):
     ls.progress.end(token, WorkDoneProgressEnd(message='Finished'))
 
 
-@json_server.command(JsonLanguageServer.CMD_REGISTER_COMPLETIONS)
-async def register_completions(ls: JsonLanguageServer, *args):
+@greet_server.command(GreetLanguageServer.CMD_REGISTER_COMPLETIONS)
+async def register_completions(ls: GreetLanguageServer, *args):
     """Register completions method on the client."""
     params = RegistrationParams(registrations=[
                 Registration(
@@ -206,8 +206,8 @@ async def register_completions(ls: JsonLanguageServer, *args):
 
 
 
-@json_server.command(JsonLanguageServer.CMD_UNREGISTER_COMPLETIONS)
-async def unregister_completions(ls: JsonLanguageServer, *args):
+@greet_server.command(GreetLanguageServer.CMD_UNREGISTER_COMPLETIONS)
+async def unregister_completions(ls: GreetLanguageServer, *args):
     """Unregister completions method on the client."""
     params = UnregistrationParams(unregisterations=[
         Unregistration(id=str(uuid.uuid4()), method=TEXT_DOCUMENT_COMPLETION)

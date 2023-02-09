@@ -30,6 +30,8 @@ That's it.  Each phrase consists of just two words: a *salutation* - "hello" or 
 
 [^1]: It's common to formally describe the syntax of a programming language with a grammar, often defined in *Backus-Naur Format* (BNF).  See e.g. [wikipedia](https://en.wikipedia.org/wiki/Syntax_(programming_languages) for more information.
 
+<a name="greet-grammar"></a>
+
 ```bnf
     greeting    ::= salutation name
     salutation  ::= 'Hello' | 'Goodbye'
@@ -57,12 +59,14 @@ As per the introduction, the solution comprises 2 parts:
 
 Though vscode calls these "extensions", I'm going to use "plugin" from here on in.  The reason is that "extension" is also used when referring to filenames (e.g. the `.py` part in `file.py`).  We need to refer to both, so I'll use `plugin` for the things that provide language support, and `extension` specifically when referring to file names.
 
+<a name="protocol-overview"></a>
+
 ### Client-Server Interaction
 
 The client and server communicate using the language server protocol itself.  It defines two types of interactions:
 
 * **Notifications**.  For example, the client can send a `textDocument/didOpen` notification to the server to indicate that a file, of the type supported by the server, has been opened.  Notifications are one-way events: there's no expectation of a reply.  In this case, the client is just letting the server know a file has been opened.  There's no formal expectation of what the server does with that knowledge.  Though, in this case, a reasonable outcome would be for the server to read the file in preparation for subsequent requests.
-* **request/response pairs**.  For example, the client can send the  `textDocument/definition` request to the server if the editor user invokes the "go to definition" command (e.g. to jump to the implementation of a function from a site where it's called).  The server is expected to respond, in this case with a `textDocument/definition` response.  (As a side note: both client and server can issue requests - not just the client).  
+* **Request/response pairs**.  For example, the client can send the  `textDocument/definition` request to the server if the editor user invokes the "go to definition" command (e.g. to jump to the implementation of a function from a site where it's called).  The server is expected to respond, in this case with a `textDocument/definition` response.  (As a side note: both client and server can issue requests - not just the client).  
 
 Interactions are encoded using [JSON-RPC](https://www.jsonrpc.org/).  Here's an example (taken from the [official docs](https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/)):
 
@@ -190,16 +194,16 @@ Despite all the boilerplate, there are 3 primary files that implement the plugin
 * [server/server.py](server/server.py) implements the server.
 * [package.json](./package.json) which describes the capabilities that the client and server provide.
 
-<a name="language-implementation"></a>
 
-## Implementing the Language Support
+## Tidying up the skeleton
 
-With the skeleton in place, we can start making the changes needed to support our `greet` language.   There are a few things to do:
+***Note:*** if you're eager to get onto actually implementing language support, then [skip ahead](#language-implementation).  This section tidies up the skeleton and gets ready for that.  Some would argue it's just noise, but understanding how things fit together can be interesting.  Or helpful.  Or both.  If it's not your bag, move along.  
+
+With the skeleton in place, we can start making the changes needed to support our `greet` language.   There are a few housekeeping tasks to complete:
 
 1. Change the plugin so it's activated on files with a `.greet` extension (the skeleton is activated for `json` files)
 1. Get rid of the extraneous commands supported by the skeleton that we don't need.
 1. Rename the relevant classes, methods and names from `json` to `greet`
-1. Implement the language 
 
 ### Tiny baby steps - setting the language
 
@@ -265,6 +269,7 @@ function getClientOptions(): LanguageClientOptions {
 
 With those changed, we can launch the plugin in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
 
+
 ### Cleaning up 
 
 The skeleton plugin implements multiple commands for illustration.  We don't need them here, so they can be removed.  If you run the plugin in a development instance and type `ctrl-shift-p` then enter "countdown" in the dialogue box, you should see several options like "Count down 10 seconds [Blocking]".  We don't need those. That needs changes in 2 places:
@@ -321,6 +326,173 @@ Launching the development instance, typing `ctrl-shift-p` and entering "countdow
 ## Naming: enough, already, Json
 
 The skeleton is based on suport for `json` files, and that's used throughout [extension.ts](./client/src/extension.ts), [server.py](server/server.py) and [package.json](package.json).
+
+
+### Package.json
+
+Let's start with `package.json`.  The first chunk of relevance sits right at the top of the file:
+
+```json
+{
+  "name": "json-extension",
+  "description": "Simple json extension example",
+  "author": "Open Law Library",
+  "repository": "https://github.com/openlawlibrary/pygls",
+  "license": "Apache-2.0",
+  "version": "0.11.3",
+  "publisher": "openlawlibrary",
+  //...
+```
+We can change that as follows:
+
+```json
+{
+  "name": "greet",
+  "description": "Support for the greet salutation example language",
+  "author": "sfinnie",
+  "repository": "https://github.com/sfinnie/helloLSP",
+  "license": "Apache-2.0",
+  "version": "0.0.1",
+  "publisher": "sfinnie",
+```
+
+The next bit is the configuration section.  It currently reads:
+
+```json
+    "configuration": {
+      "type": "object",
+      "title": "Json Server Configuration",
+      "properties": {
+        "jsonServer.exampleConfiguration": {
+          "scope": "resource",
+          "type": "string",
+          "default": "You can override this message."
+        }
+      }
+    }
+```
+
+It's a bit academic, because we don't have any configuration at the moment. It's helpful to see how it fits together though, so let's leave it in but update it:
+
+```json
+    "configuration": {
+      "type": "object",
+      "title": "Greet Server Configuration",
+      "properties": {
+        "greetServer.exampleConfiguration": {
+          "scope": "resource",
+          "type": "string",
+          "default": "Greet says you can override this message."
+        }
+      }
+    }
+```
+
+That's `package.json` done.  Let's do the client next.
+
+### extension.ts
+
+The first section in the client is in the `getClientOptions()` function that we update earlier.  Here's how it looks currently:
+
+```typescript
+function getClientOptions(): LanguageClientOptions {
+    return {
+        // Register the server for 'greet' documents
+        documentSelector: [
+            { scheme: "file", language: "greet" },
+            { scheme: "untitled", language: "greet" },
+        ],
+        outputChannelName: "[pygls] JsonLanguageServer",
+```
+
+It's the last line we want to change, as follows:
+```typescript
+        outputChannelName: "[pygls] GreetLanguageServer",
+```
+I've left `[pygls]` in there.  It's completely optional, but it might be useful to know that's what the server is based on.  If nothing else, it's a nice little acknowledgement for the nice folks who put it together and shared it with the world.
+
+
+That's it for the client - onto the server.
+
+### server.py
+
+The change in the server is the main language server class:
+
+```python
+class JsonLanguageServer(LanguageServer):
+    CMD_PROGRESS = 'progress'
+    #...
+
+json_server = JsonLanguageServer('pygls-json-example', 'v0.1')
+```
+
+Unsurprisingly, that becomes:
+
+```python
+class GreetLanguageServer(LanguageServer):
+    CMD_PROGRESS = 'progress'
+    #...
+
+greet_server = GreetLanguageServer('pygls-json-example', 'v0.1')
+```
+
+`greet_server` is referenced in several places in the file, so they all need updated.  Same with `GreetLanguageServer`.
+
+There's a couple of functions for validating the contents of a file (`_validate()`, `_validate_json()`).  We're going to update them later, so can leave the `json` references for now.
+
+That's the renaming complete.  Time, at last, to actually start implementing our support for greet.
+
+
+<a name="language-implementation"></a>
+
+## Implementing Greet Language Support
+
+Hurrah!  Finally time to implement the language support.  But what does that actually mean?  The Language Server Protocol defines several [language features](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#languageFeatures), for example:
+
+* [Goto Declaration](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_declaration)
+* [Find References](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references)
+* [Completion Items](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_completion)
+
+We'll start, though with checking that a `greet` file is consistent with the [grammar](greet-grammar).  We know from [earlier](#protocol-overview) that notifications can also be sent from the client to the server and vice-versa.  One of those notifications is `textDocument/didOpen` which is sent when a document of the type supported by the plugin, is opened. We saw that in the development instance: it displayed the message `Text Document Did Open` when we opened a file with the `.greet` extension.  Here's the source of that in `server.py`:
+
+```python
+@greet_server.feature(TEXT_DOCUMENT_DID_OPEN)
+async def did_open(ls, params: DidOpenTextDocumentParams):
+    """Text document did open notification."""
+    ls.show_message('Text Document Did Open')
+    _validate(ls, params)
+```
+
+It's pretty self-explanatory.  The `@greet_server.feature` line is where `pygls` does its magic.  Behind that simple line, `pygls` manages receiving the notification in `json-rpc` format, parsing out the parameters into a `DidOpenTextDocumentParams` object, and calling the `did_open` function.  Aside from showing the message saw on screen earlier[^5], the function calls `validate()` to check the file contents.  
+
+[^5]: Just in case you're in any doubt, change the message to something like 'Text Document Did Open a greet file' and launch a development instance.  Open a `.greet` file, and marvel at the outcome.
+
+The skeleton `_validate()` function checks whether the file is valid `json` so we need to change that.  The compiler world tends to talk about *parsing* rather than *validating*.  It's a bit pedantic, but I'm going to stick to that here.  So the functions we'll look at are named `_parse()` not `_validate()`.  
+
+1. Extracting the source file name from the paramers and reading its contents
+1. Checking the contents
+
+We'll stick to that.  The first function doesn't change (other than the name):
+
+```python
+def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams):
+    ls.show_message_log('Validating json...')
+
+    text_doc = ls.workspace.get_document(params.text_document.uri)
+
+    source = text_doc.source
+    diagnostics = _parse_greet(source) if source else []
+
+    ls.publish_diagnostics(text_doc.uri, diagnostics)
+```
+
+Note the error handling if there's no source document.  The meat is in the `_parse_greet()` function.  How do we parse the file?  The grammar tells us the rules for a greeting, but how do we implement it?  There's lots of well-established [theory](https://en.wikipedia.org/wiki/Parsing) on parsing, several techniques, and lots of libraries to support it.  That's a bit overkill for our needs.  Our approach is broadly:
+
+1. Read in the file, breaking it up into lines
+1. For each line, check if it contains a valid greeting:
+    1. Does it start with either "Hello" or "Goodbye"?
+    1. If so, is it followed by a name that satisfies the `[a-zA-Z]+` pattern?
+
 
 
 

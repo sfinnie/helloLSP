@@ -453,7 +453,7 @@ Hurrah!  Finally time to implement the language support.  But what does that act
 * [Find References](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references)
 * [Completion Items](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_completion)
 
-We'll start, though with checking that a `greet` file is consistent with the [grammar](greet-grammar).  We know from [earlier](#protocol-overview) that notifications can also be sent from the client to the server and vice-versa.  One of those notifications is `textDocument/didOpen` which is sent when a document of the type supported by the plugin, is opened. We saw that in the development instance: it displayed the message `Text Document Did Open` when we opened a file with the `.greet` extension.  Here's the source of that in `server.py`:
+We'll start with checking that a `greet` file is consistent with the [grammar](greet-grammar).  We know from [earlier](#protocol-overview) that notifications can be sent from the client to the server and vice-versa.  One of those notifications is `textDocument/didOpen` which is sent when a document, of the type supported by the plugin, is opened. We saw that in the development instance: it displayed the message `Text Document Did Open` when we opened a file with the `.greet` extension.  Here's the source of that in `server.py`:
 
 ```python
 @greet_server.feature(TEXT_DOCUMENT_DID_OPEN)
@@ -463,9 +463,12 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
     _validate(ls, params)
 ```
 
-It's pretty self-explanatory.  The `@greet_server.feature` line is where `pygls` does its magic.  Behind that simple line, `pygls` manages receiving the notification in `json-rpc` format, parsing out the parameters into a `DidOpenTextDocumentParams` object, and calling the `did_open` function.  Aside from showing the message saw on screen earlier[^5], the function calls `validate()` to check the file contents.  
+It's pretty self-explanatory.  The `@greet_server.feature` line is where `pygls` does its magic.  Behind that simple line, `pygls` manages receiving the notification in `json-rpc` format, parsing out the parameters into a `DidOpenTextDocumentParams` object, and calling the `did_open` function.  Aside from showing the message we saw on screen earlier[^5], the function calls `_validate()` to check the file contents [^6]. 
 
 [^5]: Just in case you're in any doubt, change the message to something like 'Text Document Did Open a greet file' and launch a development instance.  Open a `.greet` file, and marvel at the outcome.
+
+[^6]: the underscore is a convention to indicate that `validate()` is a function only intended for use inside `server.py`.  
+
 
 The skeleton `_validate()` function checks whether the file is valid `json` so we need to change that.  The compiler world tends to talk about *parsing* rather than *validating*.  It's a bit pedantic, but I'm going to stick to that here.  So the functions we'll look at are named `_parse()` not `_validate()`.  
 
@@ -486,7 +489,37 @@ def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams):
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 ```
 
-Note the error handling if there's no source document.  The meat is in the `_parse_greet()` function.  How do we parse the file?  The grammar tells us the rules for a greeting, but how do we implement it?  There's lots of well-established [theory](https://en.wikipedia.org/wiki/Parsing) on parsing, several techniques, and lots of libraries to support it.  That's a bit overkill for our needs.  Our approach is broadly:
+Note the error handling if there's no source document.  `ls.publish_diagnostics()` passes any errors found back to the client for display in the editor.  The meat is in the `_parse_greet()` function.  How do we parse the file?  The grammar tells us the rules for a greeting, but how do we implement it?  The skeleton takes advantage of Python's `json.loads()` function to do the parsing.  Here's the skeleton implementation:
+
+```python
+def _parse_greet(source):
+    """Validates json file."""
+    diagnostics = []
+
+    try:
+        json.loads(source)
+    except JSONDecodeError as err:
+        msg = err.msg
+        col = err.colno
+        line = err.lineno
+
+        d = Diagnostic(
+            range=Range(
+                start=Position(line=line - 1, character=col - 1),
+                end=Position(line=line - 1, character=col)
+            ),
+            message=msg,
+            source=type(greet_server).__name__
+        )
+
+        diagnostics.append(d)
+
+    return diagnostics
+```
+
+The majority of the code deals with creating the `Diagnostic` - the data structure that informs the editor where the error lies, and what the problem is.
+
+Python's standard library doesn't have a built-in function for loading `.greet` files.  There's lots of well-established [theory](https://en.wikipedia.org/wiki/Parsing) on parsing, several techniques, and lots of libraries to support it.  That's a bit overkill for our needs.  Our approach is broadly:
 
 1. Read in the file, breaking it up into lines
 1. For each line, check if it contains a valid greeting:

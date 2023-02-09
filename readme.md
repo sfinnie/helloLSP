@@ -176,7 +176,7 @@ To build initially and check it's working:
 
 1. In the development instance of vscode, open the `samples` sub-directory of this project.
 
-1. Open one of the sample files.  The editor should show an information message at the bottom of the main window that says "Text Document Did Open".
+1. Open one the sample json file.  The editor should show an information message at the bottom of the main window that says "Text Document Did Open".
 
 With that done, the basics are all in place.  Close the development instance for now and go back to the main project instance.  The code at this point is [tagged as v0.1](https://github.com/sfinnie/helloLSP/releases/tag/v0.1) if you want to have a look.
 
@@ -210,7 +210,9 @@ It's configured in the `package.json` file.  The relevant section in the skeleto
   ],
 ```
 
-We need to make a few changes.  For a start, the skeleton assumes vscode already knows about `json` as a language.  It won't know anything about `greet`.  So we need to define the language identity, define the file extensions, and let vscode know when the activate our extension.  Here's what that looks like:
+We need to make a few changes.  For a start, the skeleton assumes vscode already knows about `json` as a language.  It won't know anything about `greet`.  So we need to define the language identity, define the file extensions, and let vscode know when the activate our extension.  Here's what that looks like[^4]
+
+[^4]: It's not strictly necessary to include the `activationEvents` section: vscode infers that from language contributions in recent versions.  There's no downsides to doing so though, and means the extension will work with older versions of vscode.
 
 ```json
 "contributes": {
@@ -231,6 +233,10 @@ We need to make a few changes.  For a start, the skeleton assumes vscode already
     "onLanguage:greet"
   ],
 ```
+
+With that changed, we can launch the extension in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
+
+
 
 
 TODO

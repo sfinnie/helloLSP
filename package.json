@@ -13,9 +13,21 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:json"
+    "onLanguage:greet"
   ],
   "contributes": {
+    "languages": [
+        {
+          "id": "greet",
+          "aliases": [
+            "Greet",
+            "greet"
+          ],
+          "extensions": [
+            ".greet"
+          ]
+        }
+      ],   
     "commands": [
       {
         "command": "countDownBlocking",

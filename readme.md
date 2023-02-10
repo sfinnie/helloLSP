@@ -595,7 +595,11 @@ def did_change(ls, params: DidChangeTextDocumentParams):
 
 Compare it to the `textDocument/didOpen` function [above](#did-open) and you'll see the implementation is exactly the same: call the `_parse()` function.  So parsing gets invoked both when a file is opened, and when it's changed.
 
-That's it for our first language feature implementation - job done.  It's notable that the code for actually checking the file has taken a lot less column inches than all of the preparation that preceded it.  Of course, `greet` is a trivial language.  And, so far, we've only implemented basic diagnostics.  But before we add any additional capabilities, we should think about testing.
+That's it for our first language feature implementation - job done.  It's notable that the code for actually checking the file has taken a lot less column inches than all of the preparation that preceded it.  Of course, `greet` is a trivial language.  And, so far, we've only implemented basic diagnostics.  
+
+The code at this point is tagged as [v0.2](https://github.com/sfinnie/helloLSP/releases/tag/v0.2).
+
+Before we add any additional capabilities, we should think about testing.
 
 ## Testing
 

@@ -26,7 +26,7 @@ Thankfully we don't need anything approaching the complexity of a real programmi
     Hello bob
     Goodbye Nellie
 
-That's it.  Each phrase consists of just two words: a *salutation* - "hello" or "goodbye" - and a name.  Here's a grammar[^1] for the language:
+That's it.  Each phrase consists of just two words: a *salutation* - "Hello" or "Goodbye" - and a name.  Here's a grammar[^1] for the language:
 
 [^1]: It's common to formally describe the syntax of a programming language with a grammar, often defined in *Backus-Naur Format* (BNF).  See e.g. [wikipedia](https://en.wikipedia.org/wiki/Syntax_(programming_languages) for more information.
 
@@ -52,7 +52,7 @@ If you know the basics of how LSP works, [skip ahead to the implementation skele
 
 As per the introduction, the solution comprises 2 parts:
 
-* the *client* integrates with the editor - vscode in this case.  Each editor has its own approach to integrating extensions.  Editors support extensions for many languages - so our extension will be one of several installed in any installation.  The client has to comply with that, so it's job is broadly to:
+* the *client* integrates with the editor - vscode in this case.  Each editor has its own approach to integrating extensions.  Editors support extensions for many languages - so our extension will be one of several installed in any deployment.  The client has to comply with that, so it's job is broadly to:
   * tell the editor what language it supports
   * liaise between the editor and the server
 * the *server* provides the smarts on the language (as per the overview quote [above](#lsp-overview))
@@ -66,7 +66,7 @@ Though vscode calls these "extensions", I'm going to use "plugin" from here on i
 The client and server communicate using the language server protocol itself.  It defines two types of interactions:
 
 * **Notifications**.  For example, the client can send a `textDocument/didOpen` notification to the server to indicate that a file, of the type supported by the server, has been opened.  Notifications are one-way events: there's no expectation of a reply.  In this case, the client is just letting the server know a file has been opened.  There's no formal expectation of what the server does with that knowledge.  Though, in this case, a reasonable outcome would be for the server to read the file in preparation for subsequent requests.
-* **Request/response pairs**.  For example, the client can send the  `textDocument/definition` request to the server if the editor user invokes the "go to definition" command (e.g. to jump to the implementation of a function from a site where it's called).  The server is expected to respond, in this case with a `textDocument/definition` response.  (As a side note: both client and server can issue requests - not just the client).  
+* **Request/response pairs**.  For example, the client can send the  `textDocument/definition` request to the server if the user invokes the "go to definition" command (e.g. to jump to the implementation of a function from a site where it's called).  The server is expected to respond, in this case with a `textDocument/definition` response.  (As a side note: both client and server can issue requests - not just the client).  
 
 Interactions are encoded using [JSON-RPC](https://www.jsonrpc.org/).  Here's an example (taken from the [official docs](https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/)):
 
@@ -93,7 +93,7 @@ It's pretty self-explanatory:
 * The `uri` defines the document the user is editing
 * the `position` defines the line and column in the file that the user's cursor was at when they invoked the "go to definition" command.
 
-The position highlights an important point on how the editor and server communicate. It's all founded on the position in a file, where the position comprises line (row) and column.
+The position highlights an important point on how the editor and server communicate. It's all founded on the location in a file, comprising line (row) and column.
 
 Here's a typical response (again from the [official docs](https://microsoft.github.io/language-server-protocol/overviews/lsp/overview/)):
 
@@ -121,7 +121,7 @@ Again, fairly explanatory:
 
 * the `id` is used to correlate the response with the request.  The user might, for example, have changed their mind and started typing again, in which case the editor needs to know it can discard the response.
 * the `result` contains the response to the request.  It says:
-  * The definition of the symbol in the request is contained in the `uri`.  Note it's a different file to the uri in the request.
+  * The definition of the symbol referred to in the request is contained in the file specified by the `uri`.  Note it's a different file to the uri in the request.
   * The `start` and `end` define the line & column positions that delimit the definition.  For example, this could be the first and last characters of the name of the function being referenced.  
 
 It's entirely up to the server to decide what constitutes the definition.  Note, again, the use of line and column to define position.
@@ -142,7 +142,7 @@ $ mkdir helloLSP
 $ cd helloLSP
 ```
 
-There's a fair bit of boilerplate that needs to be in place before we can really get started on the implementing support for `greet`.  It's a bit fiddly and difficult to get right from first principles.  However, luckily, we don't need to. I used [this example](https://github.com/openlawlibrary/pygls/tree/master/examples/json-vscode-extension) as a template.  There are [many](https://microsoft.github.io/language-server-protocol/implementors/servers/) [examples](https://github.com/openlawlibrary/pygls/tree/master/examples) [available](https://github.com/microsoft/vscode-python-tools-extension-template) and reading some others too is worthwhile to get a sense of what's involved.
+There's a fair bit of boilerplate that needs to be in place before we can really get started on implementing support for `greet`.  It's a bit fiddly and difficult to get right from first principles.  However, luckily, we don't need to. I used [this example](https://github.com/openlawlibrary/pygls/tree/master/examples/json-vscode-extension) as a template.  There are [many](https://microsoft.github.io/language-server-protocol/implementors/servers/) [examples](https://github.com/openlawlibrary/pygls/tree/master/examples) [available](https://github.com/microsoft/vscode-python-tools-extension-template) and reading some others too is worthwhile to get a sense of what's involved.
 
 To build initially and check it's working:
 
@@ -178,6 +178,8 @@ To build initially and check it's working:
     }
     ```
 
+    You'll need to adjust this as required for your platform.  On Linux, this is likely to be `${workspaceFolder}/.venv/bin/python3`.
+
 1. Run the extension client and server in a separate "development" instance of vscode by typing `ctrl-shift-D`, selecting `Server + Client` in the "Launch" dropdown at the top of the screen, and hitting `F5`.
 
 1. In the development instance of vscode, open the `samples` sub-directory of this project.
@@ -192,12 +194,12 @@ Despite all the boilerplate, there are 3 primary files that implement the plugin
 
 * [client/src/extension.ts](client/src/extension.ts) implements the client
 * [server/server.py](server/server.py) implements the server.
-* [package.json](./package.json) which describes the capabilities that the client and server provide.
+* [package.json](./package.json) describes the capabilities that the client and server provide.
 
 
 ## Tidying up the skeleton
 
-***Note:*** if you're eager to get onto actually implementing language support, then [skip ahead](#language-implementation).  This section tidies up the skeleton and gets ready for that.  Some would argue it's just noise, but understanding how things fit together can be interesting.  Or helpful.  Or both.  If it's not your bag, move along.  
+***Note:*** if you're eager to get onto actually implementing language support, then [skip ahead](#language-implementation).  This section cleans up the skeleton and gets ready for that.  Understanding how things fit together can be instructive, but if it's not your bag, move along.  
 
 With the skeleton in place, we can start making the changes needed to support our `greet` language.   There are a few housekeeping tasks to complete:
 
@@ -207,7 +209,7 @@ With the skeleton in place, we can start making the changes needed to support ou
 
 ### Tiny baby steps - setting the language
 
-Let's start with the filrname extension.  There's actually 2 parts to this, because vscode separates language *identity* from the filename *extension*.  That allows a single language to support multiple extensions.  For example: the Java tooling supports both `.jav` and `.java` extensions.
+Let's start with the filename extension.  There's actually 2 parts to this, because vscode separates language *identity* from the filename *extension*.  That allows a single language to support multiple extensions.  For example: the Java tooling supports both `.jav` and `.java` extensions.
 
 The language and extension(s) are configured in the `package.json` file.  The relevant section in the skeleton reads as follows:
 
@@ -259,7 +261,7 @@ We need to change that to:
 ```typescript
 function getClientOptions(): LanguageClientOptions {
     return {
-        // Register the server for plain text documents
+        // Register the server for 'greet' documents
         documentSelector: [
             { scheme: "file", language: "greet" },
             { scheme: "untitled", language: "greet" },
@@ -267,7 +269,7 @@ function getClientOptions(): LanguageClientOptions {
     //...
 ```
 
-With those changed, we can launch the plugin in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. CLose the development instance.  Change 1 complete.
+With those changed, we can launch the plugin in a development window again (`ctrl-shift-D`, select "Server + Client", hit `F5`).  Open `samples/valid.greet` in the editor and, again, you should see the `Text Document Did Open` message. Close the development instance.  Change 1 complete.
 
 
 ### Cleaning up 
@@ -291,6 +293,7 @@ Here's an excerpt from each.
 ```
 
 ```python
+# server.py
 class JsonLanguageServer(LanguageServer):
     CMD_COUNT_DOWN_BLOCKING = 'countDownBlocking'
     # several more
@@ -392,7 +395,7 @@ That's `package.json` done.  Let's do the client next.
 
 ### extension.ts
 
-The first section in the client is in the `getClientOptions()` function that we update earlier.  Here's how it looks currently:
+The only relevant section in the client is in the `getClientOptions()` function that we update earlier.  Here's how it looks currently:
 
 ```typescript
 function getClientOptions(): LanguageClientOptions {
@@ -409,7 +412,7 @@ It's the last line we want to change, as follows:
 ```typescript
         outputChannelName: "[pygls] GreetLanguageServer",
 ```
-I've left `[pygls]` in there.  It's completely optional, but it might be useful to know that's what the server is based on.  If nothing else, it's a nice little acknowledgement for the nice folks who put it together and shared it with the world.
+I've left `[pygls]` in there.  It's completely optional, but it might be useful to know that's what the server is based on.  If nothing else, it's a nice little acknowledgement for the good folks who put `pygls` together and shared it with the world.
 
 
 That's it for the client - onto the server.
@@ -455,6 +458,8 @@ Hurrah!  Finally time to implement the language support.  But what does that act
 
 We'll start with checking that a `greet` file is consistent with the [grammar](greet-grammar).  We know from [earlier](#protocol-overview) that notifications can be sent from the client to the server and vice-versa.  One of those notifications is `textDocument/didOpen` which is sent when a document, of the type supported by the plugin, is opened. We saw that in the development instance: it displayed the message `Text Document Did Open` when we opened a file with the `.greet` extension.  Here's the source of that in `server.py`:
 
+<a name="did-open"></a>
+
 ```python
 @greet_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
@@ -472,10 +477,14 @@ It's pretty self-explanatory.  The `@greet_server.feature` line is where `pygls`
 
 The skeleton `_validate()` function checks whether the file is valid `json` so we need to change that.  The compiler world tends to talk about *parsing* rather than *validating*.  It's a bit pedantic, but I'm going to stick to that here.  So the functions we'll look at are named `_parse()` not `_validate()`.  The skeleton functions cover the following:
 
-1. Extracting the source file name from the parameters and reading its contents
+1. Extracting the source file contents from the parameters
 1. Checking the contents
 
-We'll stick to that.  The first function doesn't change (other than the name):
+It's worth noting at this point that the `DidOpenTextDocumentParams` object contains the *actual content* of the file being edited, not just a `uri` reference for it.  This is a deliberate design decision in the protocol.  From the [spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_didOpen):
+
+> The document’s content is now managed by the client and the server must not try to read the document’s content using the document’s Uri. 
+
+Back to the functions.  The first one doesn't change (other than the name):
 
 ```python
 def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams):
@@ -489,7 +498,7 @@ def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams):
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 ```
 
-Note the error handling if there's no source document.  `ls.publish_diagnostics()` passes any errors found back to the client for display in the editor.  The meat is in the `_parse_greet()` function.  How do we parse the file?  The grammar tells us the rules for a greeting, but how do we implement it?  The skeleton takes advantage of Python's `json.loads()` function to do the parsing.  Here's the skeleton implementation:
+Note the error handling if there's no source content.  `ls.publish_diagnostics()` passes any errors found back to the client for display in the editor.  The meat is in the `_parse_greet()` function.  How do we parse the file?  The grammar tells us the rules for a greeting, but how do we implement it?  The skeleton takes advantage of Python's `json.loads()` function to do the parsing.  Here's the skeleton implementation:
 
 ```python
 def _parse_greet(source):
@@ -519,12 +528,79 @@ def _parse_greet(source):
 
 The majority of the code deals with creating the `Diagnostic` - the data structure that informs the editor where the error lies, and what the problem is.
 
-Not unreasonably, Python's standard library doesn't have a built-in function for loading `.greet` files.  There's lots of well-established [theory](https://en.wikipedia.org/wiki/Parsing) on parsing, several techniques, and lots of libraries to support it.  That's a bit overkill for our needs.  Our approach is broadly:
+Not unreasonably, Python's standard library doesn't have a built-in function for loading `.greet` files.  There's lots of well-established [theory](https://en.wikipedia.org/wiki/Parsing) on parsing, several techniques, and lots of libraries to support it.  That's a bit overkill for our needs here though.  Our approach is broadly:
 
 1. Read in the file, breaking it up into lines
 1. For each line, check if it contains a valid greeting:
     1. Does it start with either "Hello" or "Goodbye"?
     1. If so, is it followed by a name that satisfies the `[a-zA-Z]+` pattern?
+
+Here's the implementation:
+
+```python
+def _parse_greet(source: str):
+    """Parses a greeting file.  Generates diagnostic messages for any problems found"""
+    diagnostics = []
+
+    grammar = re.compile(r'^(Hello|Goodbye)\s+([a-zA-Z]+)\s*$')
+
+    lines = [line.rstrip() for line in source.splitlines()]
+    for line_num, line_contents in enumerate(lines):
+        if len(line_contents) == 0:
+            # Don't treat blank lines as an error
+            continue
+        
+        match = re.match(grammar, line_contents)
+        if match is None:
+            d = Diagnostic(
+                    range=Range(
+                        start=Position(line=line_num, character=0),
+                        end=Position(line=line_num, character=len(line_contents))
+                    ),
+                    message="Greeting must be either 'Hello <name>' or 'Goodbye <name>'",
+                    source=type(greet_server).__name__
+                )
+            diagnostics.append(d)
+
+ 
+    return diagnostics
+```
+
+The first thing to note is the grammar:
+
+```python
+grammar = re.compile(r'^(Hello|Goodbye)\s+([a-zA-Z]+)\s*$')
+```
+
+ It's a [regular expression](https://docs.python.org/3/howto/regex.html) (regex) and shows off the pros and cons of using them.  On the 'pro' side, it's a very succinct way of expressing the grammar.  On the 'con' side, it's a very succinct way of expressing the grammar.  This is about the limit of complexity I'm personally comfortable with: it's still readable with some concentration.  Much more than this, though, and I'd want to take a different approach.  For sake of clarity, let's break it down.
+
+ * The `^` means the grammar must match the start of the line: there can't be any characters (including white space) before the first pattern
+ * The first pattern matches the salutation: `(Hello|Goodbye)` means match ths string 'Hello' or the string 'Goodbye'.  The brackets mean the match will capture which string matched: we're not using that here but will later.
+ * The second pattern - `\s+` - means match one or more white space characters after the salutation and before what follows.  `\s` means match a single whitespace character (space, tab); `+` means match one or more.
+ * The third pattern matches the name: `([a-zA-Z]+)`.  This is exactly the same as the formal grammar defined [above](#greet-grammar).  Again, the surrounding brackets mean the value should be captured if match is successful
+ * The final patters - `\s*$` - means match zero or more whitespace characters befire the end of the line.  Again, `\s` means match a single whitespace character; `*` means match zero or more; and `$` means match the end of the string.
+
+ We iterate through each line in the file in turn, checking if it matches the grammar.  If it doesn't, we create a `Diagnostic` instance that specifies the location of the problem and the error message to show.  In this first incarnation, we're not breaking down where the error lies.  That's viable with a grammar as simple as `greet` in its current form.  Anything more complex and we'd want to be a bit more specific with error messages, but it's plenty good for now.  Spin up a development instance (`ctrl-shift-D` and `f5`), open the sample .greet file, and have a play.  The editor should show a red squiggly for any lines that don't match the grammar, and show the diagnostic message if you hover over an error:
+
+ ![Sample diagnostics](docs/images/diagnostics1.png)
+
+Play about in the development instance, and the editor will respond as a line moves between being valid and invalid.  Now, if you've had your porridge/coffee/whatever, and are feeling super alert, you might be wondering why.  So far, we've only looked at the `textDocument/didOpen` message.  That only gets sent when a file is opened.  So how is the editor responding as we edit the file?  The answer is the skeleton already implements another notification, `textDocument/didChage`:
+
+```python
+@greet_server.feature(TEXT_DOCUMENT_DID_CHANGE)
+def did_change(ls, params: DidChangeTextDocumentParams):
+    """Text document did change notification."""
+    _parse(ls, params)
+```
+
+Compare it to the `textDocument/didOpen` function [above](#did-open) and you'll see the implementation is exactly the same: call the `_parse()` function.  So parsing gets invoked both when a file is opened, and when it's changed.
+
+That's it for our first language feature implementation - job done.  It's notable that the code for actually checking the file has taken a lot less column inches than all of the preparation that preceded it.  Of course, `greet` is a trivial language.  And, so far, we've only implemented basic diagnostics.  But before we add any additional capabilities, we should think about testing.
+
+## Testing
+
+
+
 
 
 
@@ -534,6 +610,6 @@ Not unreasonably, Python's standard library doesn't have a built-in function for
 
 1. Testing
 1. Packaging and deploying
-1. Adding more language features: o to definition, suggestions, others
+1. Adding more language features: go to definition, suggestions, others
 1. Implement a more realistic language, possibly using tree sitter to parse.
 

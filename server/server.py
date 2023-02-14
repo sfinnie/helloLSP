@@ -69,7 +69,7 @@ def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams | DidChang
 
 
 def _parse_greet(source: str):
-    """Parses a greeting file.  Generates diagnotic messages for any problems found"""
+    """Parses a greeting file.  Generates diagnostic messages for any problems found"""
     diagnostics = []
 
     grammar = re.compile(r'^(Hello|Goodbye)\s+([a-zA-Z]+)\s*$')

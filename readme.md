@@ -643,12 +643,61 @@ rootdir: C:\Users\sfinnie\projects\spikes\languageServerProtocol\helloLSP
 plugins: typeguard-2.13.3
 collected 1 item
 
-tests\test_parser.py [100%] 
+tests\test_parser.py . [100%] 
 
 ============== 1 passed in 0.03s ============== 
 ```
 
-The parser is pretty simple but there's that regular expression.  We really want to make sure it's accepting what we want, and rejecting what we don't.
+The parser is pretty simple but there's that regular expression.  We really want to make sure it's accepting what we want, and rejecting what we don't.  Here's the first test:
+
+```python
+import pytest
+from server import server
+
+
+def test_valid_greeting_accepted():
+
+    greeting = "Hello Thelma"
+    result = server._parse_greet(greeting)
+    
+    assert result == []
+```
+
+Pretty straightforward.  `parse_greet()` returns a list of `Diagnostic` entries, where each entry denotes an error.  If the list is empty then there are no errors.  We also need to check for  valid greeting that uses "Goodbye" as the salutation.  Repeating the test is a bit wody, but fortunately Pytest lets us [parameterise the test](https://docs.pytest.org/en/6.2.x/parametrize.html):
+
+```python
+import pytest
+from server import server
+
+@pytest.mark.parametrize("greeting, expected", [("Hello Thelma", []), ("Goodbye Louise", [])])
+def test_valid_greeting_accepted(greeting, expected):
+
+    greeting = "Hello Thelma"
+    result = server._parse_greet(greeting)
+    
+    assert result == expected
+```
+
+We're now passing 2 test cases into the same function: "Hello Thelma" and "Goodbye Louise".  In both cases, we expect the answer to be an empty list.
+
+Let's run the tests:
+
+```bash
+$ pytest --ignore=server/tests
+============== test session starts ==============
+platform win32 -- Python 3.10.2, pytest-7.2.1, pluggy-1.0.0
+rootdir: C:\Users\sfinnie\projects\spikes\languageServerProtocol\helloLSP
+plugins: typeguard-2.13.3
+collected 2 items
+
+tests\test_parser.py .. [100%] 
+
+============== 2 passed in 0.47s ================= 
+```
+
+All good.  Note it says 2 tests passed: that confirms both test cases are being executed.
+
+
 
 
 

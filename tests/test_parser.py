@@ -1,6 +1,10 @@
 import pytest
 from server import server
 
-def test_valid_greeting_accepted():
+@pytest.mark.parametrize("greeting, expected", [("Hello Thelma", []), ("Goodbye Louise", [])])
+def test_valid_greeting_accepted(greeting, expected):
+
+    greeting = "Hello Thelma"
+    result = server._parse_greet(greeting)
     
-    assert True # stub for now
+    assert result == expected

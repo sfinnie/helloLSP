@@ -648,6 +648,8 @@ tests\test_parser.py . [100%]
 ============== 1 passed in 0.03s ============== 
 ```
 
+### Positive Tests
+
 The parser is pretty simple but there's that regular expression.  We really want to make sure it's accepting what we want, and rejecting what we don't.  Here's the first test:
 
 ```python
@@ -663,19 +665,18 @@ def test_valid_greeting_accepted():
     assert result == []
 ```
 
-Pretty straightforward.  `parse_greet()` returns a list of `Diagnostic` entries, where each entry denotes an error.  If the list is empty then there are no errors.  We also need to check for  valid greeting that uses "Goodbye" as the salutation.  Repeating the test is a bit wody, but fortunately Pytest lets us [parameterise the test](https://docs.pytest.org/en/6.2.x/parametrize.html):
+Pretty straightforward.  `_parse_greet()` returns a list of `Diagnostic` entries, where each entry denotes an error.  If the list is empty then there are no errors.  We also need to check for a valid greeting that uses "Goodbye" as the salutation.  Repeating the test is a bit wordy, but fortunately Pytest lets us [parameterise the test](https://docs.pytest.org/en/6.2.x/parametrize.html):
 
 ```python
 import pytest
 from server import server
 
-@pytest.mark.parametrize("greeting, expected", [("Hello Thelma", []), ("Goodbye Louise", [])])
-def test_valid_greeting_accepted(greeting, expected):
+@pytest.mark.parametrize("greeting", [("Hello Thelma"), ("Goodbye Louise")])
+def test_valid_greeting_accepted(greeting):
 
-    greeting = "Hello Thelma"
     result = server._parse_greet(greeting)
     
-    assert result == expected
+    assert result == []
 ```
 
 We're now passing 2 test cases into the same function: "Hello Thelma" and "Goodbye Louise".  In both cases, we expect the answer to be an empty list.
@@ -697,8 +698,64 @@ tests\test_parser.py .. [100%]
 
 All good.  Note it says 2 tests passed: that confirms both test cases are being executed.
 
+### Negative Tests
 
+We need to check the parser correctly identifies errors in invalid greetings.  After all, that's a big part of the value we want the server to provide: telling us where we've gone wrong.  Here's a first attempt:
 
+```python
+def test_invalid_greeting_rejected():
+
+    greeting = "Hell Thelma"
+    result = server._parse_greet(greeting)
+    
+    assert result != []
+```
+
+That's fine, but it doesn't check that the Diagnostic is correct.  Let's do that:
+
+```python
+def test_invalid_greeting_rejected():
+
+    greeting = "Hell Thelma"
+    result = server._parse_greet(greeting)
+
+    assert len(result) == 1
+
+    diagnostic: Diagnostic = result[0]
+    assert diagnostic.message == "Greeting must be either 'Hello <name>' or 'Goodbye <name>'"
+    
+    start: Position = diagnostic.range.start
+    end: Position = diagnostic.range.end
+    
+    assert start.line == 0
+    assert start.character == 0
+    assert end.line == 0
+    assert end.character == len(greeting)
+```
+
+There's a bit of a question about whether we should test the error message.  The test is brittle, in that if we want to change the message, it means changing the text in two places.  Arguably a better answer would be to have the message in a separate structure that both the parser function and test referred to.  Against that, it's a bit less readable.  So, for now, we'll leave as is.
+
+We need more than one test case, so again we can parameterise:  
+
+```python
+@pytest.mark.parametrize("greeting", [("Wotcha Thelma"), ("Goodbye L0u1se"), ("Goodbye Louise again")])
+def test_invalid_greeting_rejected(greeting):
+
+    result = server._parse_greet(greeting)
+
+    assert len(result) == 1
+
+    diagnostic: Diagnostic = result[0]
+    assert diagnostic.message == "Greeting must be either 'Hello <name>' or 'Goodbye <name>'"
+
+    start: Position = diagnostic.range.start
+    end: Position = diagnostic.range.end
+    
+    assert start.line == 0
+    assert start.character == 0
+    assert end.line == 0
+    assert end.character == len(greeting)
+```
 
 
 

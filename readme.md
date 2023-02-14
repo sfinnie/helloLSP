@@ -613,6 +613,9 @@ Install pytest:
 $ python -m pip install pytest
 ```
 
+
+### Testing the Parser
+
 Let's start with testing the parser itself, before we look at the server.  There are a few files to set up:
 
 ```bash
@@ -650,7 +653,7 @@ tests\test_parser.py . [100%]
 ============== 1 passed in 0.03s ============== 
 ```
 
-### Positive Tests
+#### Positive Tests
 
 The parser is pretty simple but there's that regular expression.  We really want to make sure it's accepting what we want, and rejecting what we don't.  Here's the first test:
 
@@ -700,7 +703,7 @@ tests\test_parser.py .. [100%]
 
 All good.  Note it says 2 tests passed: that confirms both test cases are being executed.
 
-### Negative Tests
+#### Negative Tests
 
 We need to check the parser correctly identifies errors in invalid greetings.  After all, that's a big part of the value we want the server to provide: telling us where we've gone wrong.  Here's a first attempt:
 

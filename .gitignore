@@ -7,5 +7,5 @@ venv/
 .idea/
 pygls.log
 server/__pycache__
-
+**/__pycache__/
 

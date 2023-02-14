@@ -584,7 +584,7 @@ grammar = re.compile(r'^(Hello|Goodbye)\s+([a-zA-Z]+)\s*$')
 
  ![Sample diagnostics](docs/images/diagnostics1.png)
 
-Play about in the development instance, and the editor will respond as a line moves between being valid and invalid.  Now, if you've had your porridge/coffee/whatever, and are feeling super alert, you might be wondering why.  So far, we've only looked at the `textDocument/didOpen` message.  That only gets sent when a file is opened.  So how is the editor responding as we edit the file?  The answer is the skeleton already implements another notification, `textDocument/didChage`:
+Play about in the development instance, and the editor will respond as a line moves between being valid and invalid.  Now, if you've had your porridge/coffee/whatever, and are feeling super alert, you might be wondering why.  So far, we've only looked at the `textDocument/didOpen` message.  That only gets sent when a file is opened.  So how is the editor responding as we edit the file?  The answer is the skeleton already implements another notification, `textDocument/didChange`:
 
 ```python
 @greet_server.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -603,6 +603,52 @@ Before we add any additional capabilities, we should think about testing.
 
 ## Testing
 
+Before we can start testing, there are a few things to set up.  These are all done from the project root.
+
+Install pytest:
+
+```bash
+$ python -m pip install pytest
+```
+
+Let's start with testing the parser itself, before we look at the server.  There are a few files to set up:
+
+```bash
+$ touch conftest.py
+$ mkdir tests
+$ touch tests/test_parser.py
+```
+
+Create the outline of the first test in [tests/test_parser.py](tests/test_parser.py):
+
+```python
+import pytest
+from server import server
+
+def test_valid_greeting_accepted():
+    
+    assert True # stub for now
+```
+
+`conftest.py` lets `pytest` know this is the project root.  It's needed so that `pytest` can resolve the `from server import server` statement in `test_parser.py` above.
+
+Before we go any further, let's make sure it's working (we'll ignore the tests that come with the skeleton - they're out of sync with our implementation, and test things differently to what we're going to cover):
+
+```bash
+$ pytest --ignore=server/tests
+
+============== test session starts ==============
+platform win32 -- Python 3.10.2, pytest-7.2.1, pluggy-1.0.0
+rootdir: C:\Users\sfinnie\projects\spikes\languageServerProtocol\helloLSP
+plugins: typeguard-2.13.3
+collected 1 item
+
+tests\test_parser.py [100%] 
+
+============== 1 passed in 0.03s ============== 
+```
+
+The parser is pretty simple but there's that regular expression.  We really want to make sure it's accepting what we want, and rejecting what we don't.
 
 
 

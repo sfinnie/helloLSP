@@ -719,30 +719,6 @@ def test_invalid_greeting_rejected():
 That's fine, but it doesn't check that the Diagnostic is correct.  Let's do that:
 
 ```python
-def test_invalid_greeting_rejected():
-
-    greeting = "Hell Thelma"
-    result = server._parse_greet(greeting)
-
-    assert len(result) == 1
-
-    diagnostic: Diagnostic = result[0]
-    assert diagnostic.message == "Greeting must be either 'Hello <name>' or 'Goodbye <name>'"
-    
-    start: Position = diagnostic.range.start
-    end: Position = diagnostic.range.end
-    
-    assert start.line == 0
-    assert start.character == 0
-    assert end.line == 0
-    assert end.character == len(greeting)
-```
-
-There's a bit of a question about whether we should test the error message.  The test is brittle, in that if we want to change the message, it means changing the text in two places.  Arguably a better answer would be to have the message in a separate structure that both the parser function and test referred to.  Against that, it's a bit less readable.  So, for now, we'll leave as is.
-
-We need more than one test case, so again we can parameterise:  
-
-```python
 @pytest.mark.parametrize("greeting", [("Wotcha Thelma"), ("Goodbye L0u1se"), ("Goodbye Louise again")])
 def test_invalid_greeting_rejected(greeting):
 
@@ -762,14 +738,14 @@ def test_invalid_greeting_rejected(greeting):
     assert end.character == len(greeting)
 ```
 
+There's a bit of a question about whether we should test the error message.  The test is brittle, in that if we want to change the message, it means changing the text in two places.  Arguably a better answer would be to have the message in a separate structure that both the parser function and test referred to.  Against that, it's a bit less readable.  So, for now, we'll leave as is.  
 
-
+The test has also been parameterised to cover some obvious failures.  Are they enough?  That depends.  We could get smarter, for example using [Hypothesis](https://hypothesis.readthedocs.io/en/latest/) to generate test input rather than relying on 3 specific test cases.  For now, though, the cases we have give sufficient confidence for the purpose here: we're exploring building a language server, not best practice in test coverage.
 
 
 
 # To Do
 
-1. Testing
 1. Packaging and deploying
 1. Adding more language features: go to definition, suggestions, others
 1. Implement a more realistic language, possibly using tree sitter to parse.

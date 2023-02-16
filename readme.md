@@ -151,10 +151,10 @@ To build initially and check it's working:
 1. Set up the Server Python environment
 
     ```bash
-    $ python -m venv venv
-    $ source venv/scripts/activate
-    $ python -m pip install -U pip
-    $ python -m pip install pygls
+    $ python3 -m venv venv
+    $ source venv/bin/activate
+    $ python3 -m pip install -U pip
+    $ python3 -m pip install pygls
     ```
 
 1. Set up the client nodejs environment
@@ -176,11 +176,11 @@ To build initially and check it's working:
 
     ```json
     {
-        "python.interpreterPath": "${workspaceFolder}/.venv/Scripts/python"
+        "python.interpreterPath": "${workspaceFolder}/venv/bin/python3"
     }
     ```
 
-    You'll need to adjust this as required for your platform.  On Linux, this is likely to be `${workspaceFolder}/.venv/bin/python3`.
+    You'll need to adjust this as required for your platform.  On Windows, this is likely to be `${workspaceFolder}/venv/Scripts/python`.
 
 1. Run the extension client and server in a separate "development" instance of vscode by typing `ctrl-shift-D`, selecting `Server + Client` in the "Launch" dropdown at the top of the screen, and hitting `F5`.
 
@@ -610,7 +610,7 @@ Before we can start testing, there are a few things to set up.  These are all do
 Install pytest:
 
 ```bash
-$ python -m pip install pytest
+$ python3 -m pip install pytest
 ```
 
 

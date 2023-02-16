@@ -132,7 +132,7 @@ It's entirely up to the server to decide what constitutes the definition.  Note,
 
 ## Implementation Skeleton
 
-OK, enough of the talking - let's code.  
+OK, enough of the talking - let's code.  I'm assuming a Unix-like environment below, with a `bash` shell.  That should work for Linux, MacOS and Windows subsystem for Linux (WSL).  
 
 ### Pre-Requisites
 

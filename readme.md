@@ -742,6 +742,19 @@ There's a bit of a question about whether we should test the error message.  The
 
 The test has also been parameterised to cover some obvious failures.  Are they enough?  That depends.  We could get smarter, for example using [Hypothesis](https://hypothesis.readthedocs.io/en/latest/) to generate test input rather than relying on 3 specific test cases.  For now, though, the cases we have give sufficient confidence for the purpose here: we're exploring building a language server, not best practice in test coverage.
 
+### Testing the Server
+
+The parser is the core of the implementation so far.  `pygls` provides most of the server implementation, handling communication with the client including marshalling and interpreting the `json-rpc` messages.  There's little value in re-testing `pygls` here: it already has a solid set of tests.  
+
+However: it is worth testing that we've wired up the parser correctly. I mentioned above that we need the parser to be called on both `textDocument/didOpen` and `textDocument/didChange`.  `pygls` can't ensure that for us.  So there's value in running some tests that ensure the full language server responds as expected in terms of `json-rpc` messages sent and received.
+
+[Side note: I'm deliberately avoiding calling these "unit" or "integration" tests.  That's a holy war that I'm not interested in getting into here.]
+
+If we're to test the server, there are a few pre-requisites we need to resolve:
+
+1. How do we start the server, and know it's started?
+1. How do we send it messages, and receive the responses?
+
 
 
 # To Do

@@ -710,7 +710,7 @@ We need to check the parser correctly identifies errors in invalid greetings.  A
 ```python
 def test_invalid_greeting_rejected():
 
-    greeting = "Hell Thelma"
+    greeting = "Hell Thelma" # should be Hello, not Hell
     result = server._parse_greet(greeting)
     
     assert result != []

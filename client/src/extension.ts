@@ -2,7 +2,8 @@
  * Original work Copyright (c) Microsoft Corporation. All rights reserved.
  * Original work licensed under the MIT License.
  * See ThirdPartyNotices.txt in the project root for license information.
- * All modifications Copyright (c) Open Law Library. All rights reserved.
+ * Initial modifications Copyright (c) Open Law Library. All rights reserved.
+ * Subsequent modifications Copyright (c) Scott Finnie.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.

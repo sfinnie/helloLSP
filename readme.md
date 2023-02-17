@@ -755,6 +755,21 @@ If we're to test the server, there are a few pre-requisites we need to resolve:
 1. How do we start the server, and know it's started?
 1. How do we send it messages, and receive the responses?
 
+#### Starting the server
+
+The skeleton project already provides a module for running the server standalone in [__main__.py](./server/__main__.py). The name __main__ has [special significance](https://docs.python.org/3/library/__main__.html) in Python and means we can start thr server from the project root as follows:
+
+```python
+$ python -m server
+```
+
+By default, the server uses standard input & output for communication.  It can alternatively use tcp or websockets (have a look in the source file).  Whichever transport is selected, it starts an the `greet_server`.  Having run the command above, we have a running server.  How do we interact with it?
+
+
+
+
+
+
 
 
 # To Do

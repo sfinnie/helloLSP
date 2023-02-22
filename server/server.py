@@ -2,7 +2,7 @@
 # Original work Copyright(c) Open Law Library. All rights reserved.        #
 # See ThirdPartyNotices.txt in the project root for additional notices.    #
 #                                                                          #
-# All modifications Copyright (c) Scott Finnie.  All rights reserved.      #
+# All modifications Copyright(c) Scott Finnie.  All rights reserved.       #
 #                                                                          #
 # Licensed under the Apache License, Version 2.0 (the "License")           #
 # you may not use this file except in compliance with the License.         #

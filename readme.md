@@ -755,6 +755,12 @@ If we're to test the server, there are a few pre-requisites we need to resolve:
 1. How do we start the server, and know it's started?
 1. How do we send it messages, and receive the responses?
 
+#### Setup 
+
+```bash
+$ python -m pip install pytest-lsp
+```
+
 #### Starting the server
 
 The skeleton project already provides a module for running the server standalone in [__main__.py](./server/__main__.py). The name __main__ has [special significance](https://docs.python.org/3/library/__main__.html) in Python and means we can start thr server from the project root as follows:

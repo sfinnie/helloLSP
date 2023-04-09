@@ -1,3 +1,16 @@
-{
-    "python.interpreterPath": "${workspaceFolder}/venv/bin/python3"
-}
+    {
+        "python.interpreterPath": "${workspaceFolder}/venv/bin/python3",
+        "terminal.integrated.profiles.windows": {
+            "PowerShell": {
+                "source": "PowerShell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass"
+                ]
+            }
+        },
+        "terminal.integrated.defaultProfile.windows": "PowerShell"
+    
+    }
+    
+

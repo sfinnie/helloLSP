@@ -16,7 +16,7 @@
           "name": "salutation",
           "content": {
             "type": "SYMBOL",
-            "name": "salutation"
+            "name": "_salutation"
           }
         },
         {
@@ -29,18 +29,26 @@
         }
       ]
     },
-    "salutation": {
+    "_salutation": {
       "type": "CHOICE",
       "members": [
         {
-          "type": "STRING",
-          "value": "hello"
+          "type": "SYMBOL",
+          "name": "hello"
         },
         {
-          "type": "STRING",
-          "value": "goodbye"
+          "type": "SYMBOL",
+          "name": "goodbye"
         }
       ]
+    },
+    "hello": {
+      "type": "PATTERN",
+      "value": "[Hh]ello"
+    },
+    "goodbye": {
+      "type": "PATTERN",
+      "value": "[Gg]oodbye"
     },
     "name": {
       "type": "PATTERN",

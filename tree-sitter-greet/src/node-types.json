@@ -18,17 +18,16 @@
         "required": true,
         "types": [
           {
-            "type": "salutation",
+            "type": "goodbye",
+            "named": true
+          },
+          {
+            "type": "hello",
             "named": true
           }
         ]
       }
     }
-  },
-  {
-    "type": "salutation",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "source_file",
@@ -47,11 +46,11 @@
   },
   {
     "type": "goodbye",
-    "named": false
+    "named": true
   },
   {
     "type": "hello",
-    "named": false
+    "named": true
   },
   {
     "type": "name",

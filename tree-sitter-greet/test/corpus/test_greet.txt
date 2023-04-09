@@ -3,14 +3,14 @@ Successful hello & goodbye
 ================================
 
 hello Petunia
-goodbye Benny
+Goodbye Benny
 
 ---
 
 (source_file
   (greeting
-    salutation: (salutation)
+    salutation: (hello)
     name: (name))
   (greeting
-    salutation: (salutation)
+    salutation: (goodbye)
     name: (name)))

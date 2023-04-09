@@ -6,7 +6,7 @@
 #endif
 
 #define LANGUAGE_VERSION 14
-#define STATE_COUNT 8
+#define STATE_COUNT 7
 #define LARGE_STATE_COUNT 4
 #define SYMBOL_COUNT 8
 #define ALIAS_COUNT 0
@@ -17,34 +17,34 @@
 #define PRODUCTION_ID_COUNT 2
 
 enum {
-  anon_sym_hello = 1,
-  anon_sym_goodbye = 2,
+  sym_hello = 1,
+  sym_goodbye = 2,
   sym_name = 3,
   sym_source_file = 4,
   sym_greeting = 5,
-  sym_salutation = 6,
+  sym__salutation = 6,
   aux_sym_source_file_repeat1 = 7,
 };
 
 static const char * const ts_symbol_names[] = {
   [ts_builtin_sym_end] = "end",
-  [anon_sym_hello] = "hello",
-  [anon_sym_goodbye] = "goodbye",
+  [sym_hello] = "hello",
+  [sym_goodbye] = "goodbye",
   [sym_name] = "name",
   [sym_source_file] = "source_file",
   [sym_greeting] = "greeting",
-  [sym_salutation] = "salutation",
+  [sym__salutation] = "_salutation",
   [aux_sym_source_file_repeat1] = "source_file_repeat1",
 };
 
 static const TSSymbol ts_symbol_map[] = {
   [ts_builtin_sym_end] = ts_builtin_sym_end,
-  [anon_sym_hello] = anon_sym_hello,
-  [anon_sym_goodbye] = anon_sym_goodbye,
+  [sym_hello] = sym_hello,
+  [sym_goodbye] = sym_goodbye,
   [sym_name] = sym_name,
   [sym_source_file] = sym_source_file,
   [sym_greeting] = sym_greeting,
-  [sym_salutation] = sym_salutation,
+  [sym__salutation] = sym__salutation,
   [aux_sym_source_file_repeat1] = aux_sym_source_file_repeat1,
 };
 
@@ -53,13 +53,13 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .visible = false,
     .named = true,
   },
-  [anon_sym_hello] = {
+  [sym_hello] = {
     .visible = true,
-    .named = false,
+    .named = true,
   },
-  [anon_sym_goodbye] = {
+  [sym_goodbye] = {
     .visible = true,
-    .named = false,
+    .named = true,
   },
   [sym_name] = {
     .visible = true,
@@ -73,8 +73,8 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .visible = true,
     .named = true,
   },
-  [sym_salutation] = {
-    .visible = true,
+  [sym__salutation] = {
+    .visible = false,
     .named = true,
   },
   [aux_sym_source_file_repeat1] = {
@@ -120,7 +120,6 @@ static const TSStateId ts_primary_state_ids[STATE_COUNT] = {
   [4] = 4,
   [5] = 5,
   [6] = 6,
-  [7] = 7,
 };
 
 static bool ts_lex(TSLexer *lexer, TSStateId state) {
@@ -129,8 +128,10 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
   switch (state) {
     case 0:
       if (eof) ADVANCE(12);
-      if (lookahead == 'g') ADVANCE(9);
-      if (lookahead == 'h') ADVANCE(3);
+      if (lookahead == 'G' ||
+          lookahead == 'g') ADVANCE(9);
+      if (lookahead == 'H' ||
+          lookahead == 'h') ADVANCE(3);
       if (lookahead == '\t' ||
           lookahead == '\n' ||
           lookahead == '\r' ||
@@ -178,10 +179,10 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       ACCEPT_TOKEN(ts_builtin_sym_end);
       END_STATE();
     case 13:
-      ACCEPT_TOKEN(anon_sym_hello);
+      ACCEPT_TOKEN(sym_hello);
       END_STATE();
     case 14:
-      ACCEPT_TOKEN(anon_sym_goodbye);
+      ACCEPT_TOKEN(sym_goodbye);
       END_STATE();
     case 15:
       ACCEPT_TOKEN(sym_name);
@@ -199,41 +200,40 @@ static const TSLexMode ts_lex_modes[STATE_COUNT] = {
   [2] = {.lex_state = 0},
   [3] = {.lex_state = 0},
   [4] = {.lex_state = 0},
-  [5] = {.lex_state = 11},
-  [6] = {.lex_state = 0},
-  [7] = {.lex_state = 11},
+  [5] = {.lex_state = 0},
+  [6] = {.lex_state = 11},
 };
 
 static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
   [0] = {
     [ts_builtin_sym_end] = ACTIONS(1),
-    [anon_sym_hello] = ACTIONS(1),
-    [anon_sym_goodbye] = ACTIONS(1),
+    [sym_hello] = ACTIONS(1),
+    [sym_goodbye] = ACTIONS(1),
   },
   [1] = {
-    [sym_source_file] = STATE(6),
+    [sym_source_file] = STATE(5),
     [sym_greeting] = STATE(2),
-    [sym_salutation] = STATE(7),
+    [sym__salutation] = STATE(6),
     [aux_sym_source_file_repeat1] = STATE(2),
     [ts_builtin_sym_end] = ACTIONS(3),
-    [anon_sym_hello] = ACTIONS(5),
-    [anon_sym_goodbye] = ACTIONS(5),
+    [sym_hello] = ACTIONS(5),
+    [sym_goodbye] = ACTIONS(5),
   },
   [2] = {
     [sym_greeting] = STATE(3),
-    [sym_salutation] = STATE(7),
+    [sym__salutation] = STATE(6),
     [aux_sym_source_file_repeat1] = STATE(3),
     [ts_builtin_sym_end] = ACTIONS(7),
-    [anon_sym_hello] = ACTIONS(5),
-    [anon_sym_goodbye] = ACTIONS(5),
+    [sym_hello] = ACTIONS(5),
+    [sym_goodbye] = ACTIONS(5),
   },
   [3] = {
     [sym_greeting] = STATE(3),
-    [sym_salutation] = STATE(7),
+    [sym__salutation] = STATE(6),
     [aux_sym_source_file_repeat1] = STATE(3),
     [ts_builtin_sym_end] = ACTIONS(9),
-    [anon_sym_hello] = ACTIONS(11),
-    [anon_sym_goodbye] = ACTIONS(11),
+    [sym_hello] = ACTIONS(11),
+    [sym_goodbye] = ACTIONS(11),
   },
 };
 
@@ -241,16 +241,13 @@ static const uint16_t ts_small_parse_table[] = {
   [0] = 1,
     ACTIONS(14), 3,
       ts_builtin_sym_end,
-      anon_sym_hello,
-      anon_sym_goodbye,
+      sym_hello,
+      sym_goodbye,
   [6] = 1,
     ACTIONS(16), 1,
-      sym_name,
+      ts_builtin_sym_end,
   [10] = 1,
     ACTIONS(18), 1,
-      ts_builtin_sym_end,
-  [14] = 1,
-    ACTIONS(20), 1,
       sym_name,
 };
 
@@ -258,21 +255,19 @@ static const uint32_t ts_small_parse_table_map[] = {
   [SMALL_STATE(4)] = 0,
   [SMALL_STATE(5)] = 6,
   [SMALL_STATE(6)] = 10,
-  [SMALL_STATE(7)] = 14,
 };
 
 static const TSParseActionEntry ts_parse_actions[] = {
   [0] = {.entry = {.count = 0, .reusable = false}},
   [1] = {.entry = {.count = 1, .reusable = false}}, RECOVER(),
   [3] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_source_file, 0),
-  [5] = {.entry = {.count = 1, .reusable = true}}, SHIFT(5),
+  [5] = {.entry = {.count = 1, .reusable = true}}, SHIFT(6),
   [7] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_source_file, 1),
   [9] = {.entry = {.count = 1, .reusable = true}}, REDUCE(aux_sym_source_file_repeat1, 2),
-  [11] = {.entry = {.count = 2, .reusable = true}}, REDUCE(aux_sym_source_file_repeat1, 2), SHIFT_REPEAT(5),
+  [11] = {.entry = {.count = 2, .reusable = true}}, REDUCE(aux_sym_source_file_repeat1, 2), SHIFT_REPEAT(6),
   [14] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_greeting, 2, .production_id = 1),
-  [16] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_salutation, 1),
-  [18] = {.entry = {.count = 1, .reusable = true}},  ACCEPT_INPUT(),
-  [20] = {.entry = {.count = 1, .reusable = true}}, SHIFT(4),
+  [16] = {.entry = {.count = 1, .reusable = true}},  ACCEPT_INPUT(),
+  [18] = {.entry = {.count = 1, .reusable = true}}, SHIFT(4),
 };
 
 #ifdef __cplusplus

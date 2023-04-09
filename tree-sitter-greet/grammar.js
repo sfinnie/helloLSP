@@ -6,14 +6,20 @@ module.exports = grammar({
   rules: {
     // TODO: add the actual grammar rules
     source_file: $ => repeat($.greeting),
+
     greeting: $ => seq(
-      field('salutation', $.salutation),
+      field('salutation', $._salutation),
       field('name', $.name)
     ),
-    salutation: $ => choice(
-      'hello',
-      'goodbye'
+
+    _salutation: $ => choice(
+      $.hello,
+      $.goodbye
     ),
+
+    hello: $ => /[Hh]ello/,
+    goodbye: $ => /[Gg]oodbye/,
+    
     name: $ => /[A-Za-z]+/
   }
 });

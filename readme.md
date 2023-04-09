@@ -771,6 +771,12 @@ $ python -m server
 
 By default, the server uses standard input & output for communication.  It can alternatively use tcp or websockets (have a look in the source file).  Whichever transport is selected, it starts an the `greet_server`.  Having run the command above, we have a running server.  How do we interact with it?
 
+## Extending the Language Grammar
+
+```bash
+$ sudo apt install python3-dev
+$ python -m pip install tree-sitter
+```
 
 
 

@@ -1,0 +1,12 @@
+================================
+Successful hello
+================================
+
+hello Petunia
+
+---
+
+(source_file
+  (greeting
+    (salutation)
+    (name)))

@@ -2,8 +2,49 @@
   "name": "greet",
   "rules": {
     "source_file": {
+      "type": "REPEAT",
+      "content": {
+        "type": "SYMBOL",
+        "name": "greeting"
+      }
+    },
+    "greeting": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "FIELD",
+          "name": "salutation",
+          "content": {
+            "type": "SYMBOL",
+            "name": "salutation"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "SYMBOL",
+            "name": "name"
+          }
+        }
+      ]
+    },
+    "salutation": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "hello"
+        },
+        {
+          "type": "STRING",
+          "value": "goodbye"
+        }
+      ]
+    },
+    "name": {
       "type": "STRING",
-      "value": "hello"
+      "value": "Bob"
     }
   },
   "extras": [

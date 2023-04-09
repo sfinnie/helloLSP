@@ -1,11 +1,60 @@
 [
   {
-    "type": "source_file",
+    "type": "greeting",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "name",
+            "named": true
+          }
+        ]
+      },
+      "salutation": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "salutation",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "salutation",
     "named": true,
     "fields": {}
   },
   {
+    "type": "source_file",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "greeting",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "goodbye",
+    "named": false
+  },
+  {
     "type": "hello",
     "named": false
+  },
+  {
+    "type": "name",
+    "named": true
   }
 ]

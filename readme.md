@@ -778,6 +778,11 @@ $ sudo apt install python3-dev
 $ python -m pip install tree-sitter
 ```
 
+Commands: 
+
+* `tree-sitter generate`: re-generate parser
+* `tree-sitter parse <file>`: attempts to parse `<file>`, generating syntax tree if successful.
+* `tree-sitter test`: run tests
 
 
 

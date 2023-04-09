@@ -43,8 +43,8 @@
       ]
     },
     "name": {
-      "type": "STRING",
-      "value": "Bob"
+      "type": "PATTERN",
+      "value": "[A-Za-z]+"
     }
   },
   "extras": [

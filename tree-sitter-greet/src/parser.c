@@ -128,62 +128,65 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
   eof = lexer->eof(lexer);
   switch (state) {
     case 0:
-      if (eof) ADVANCE(13);
-      if (lookahead == 'B') ADVANCE(8);
-      if (lookahead == 'g') ADVANCE(11);
-      if (lookahead == 'h') ADVANCE(4);
+      if (eof) ADVANCE(12);
+      if (lookahead == 'g') ADVANCE(9);
+      if (lookahead == 'h') ADVANCE(3);
       if (lookahead == '\t' ||
           lookahead == '\n' ||
           lookahead == '\r' ||
           lookahead == ' ') SKIP(0)
       END_STATE();
     case 1:
-      if (lookahead == 'b') ADVANCE(16);
+      if (lookahead == 'b') ADVANCE(10);
       END_STATE();
     case 2:
-      if (lookahead == 'b') ADVANCE(12);
+      if (lookahead == 'd') ADVANCE(1);
       END_STATE();
     case 3:
-      if (lookahead == 'd') ADVANCE(2);
+      if (lookahead == 'e') ADVANCE(5);
       END_STATE();
     case 4:
-      if (lookahead == 'e') ADVANCE(6);
+      if (lookahead == 'e') ADVANCE(14);
       END_STATE();
     case 5:
-      if (lookahead == 'e') ADVANCE(15);
+      if (lookahead == 'l') ADVANCE(6);
       END_STATE();
     case 6:
-      if (lookahead == 'l') ADVANCE(7);
+      if (lookahead == 'l') ADVANCE(8);
       END_STATE();
     case 7:
-      if (lookahead == 'l') ADVANCE(10);
+      if (lookahead == 'o') ADVANCE(2);
       END_STATE();
     case 8:
-      if (lookahead == 'o') ADVANCE(1);
+      if (lookahead == 'o') ADVANCE(13);
       END_STATE();
     case 9:
-      if (lookahead == 'o') ADVANCE(3);
+      if (lookahead == 'o') ADVANCE(7);
       END_STATE();
     case 10:
-      if (lookahead == 'o') ADVANCE(14);
+      if (lookahead == 'y') ADVANCE(4);
       END_STATE();
     case 11:
-      if (lookahead == 'o') ADVANCE(9);
+      if (lookahead == '\t' ||
+          lookahead == '\n' ||
+          lookahead == '\r' ||
+          lookahead == ' ') SKIP(11)
+      if (('A' <= lookahead && lookahead <= 'Z') ||
+          ('a' <= lookahead && lookahead <= 'z')) ADVANCE(15);
       END_STATE();
     case 12:
-      if (lookahead == 'y') ADVANCE(5);
-      END_STATE();
-    case 13:
       ACCEPT_TOKEN(ts_builtin_sym_end);
       END_STATE();
-    case 14:
+    case 13:
       ACCEPT_TOKEN(anon_sym_hello);
       END_STATE();
-    case 15:
+    case 14:
       ACCEPT_TOKEN(anon_sym_goodbye);
       END_STATE();
-    case 16:
+    case 15:
       ACCEPT_TOKEN(sym_name);
+      if (('A' <= lookahead && lookahead <= 'Z') ||
+          ('a' <= lookahead && lookahead <= 'z')) ADVANCE(15);
       END_STATE();
     default:
       return false;
@@ -196,9 +199,9 @@ static const TSLexMode ts_lex_modes[STATE_COUNT] = {
   [2] = {.lex_state = 0},
   [3] = {.lex_state = 0},
   [4] = {.lex_state = 0},
-  [5] = {.lex_state = 0},
+  [5] = {.lex_state = 11},
   [6] = {.lex_state = 0},
-  [7] = {.lex_state = 0},
+  [7] = {.lex_state = 11},
 };
 
 static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
@@ -206,7 +209,6 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [ts_builtin_sym_end] = ACTIONS(1),
     [anon_sym_hello] = ACTIONS(1),
     [anon_sym_goodbye] = ACTIONS(1),
-    [sym_name] = ACTIONS(1),
   },
   [1] = {
     [sym_source_file] = STATE(6),

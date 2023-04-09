@@ -1,4 +1,4 @@
-// const { RelativePattern } = require("vscode");
+// Grammar for the "greet" demonstration language
 
 module.exports = grammar({
   name: 'greet',
@@ -14,7 +14,7 @@ module.exports = grammar({
       'hello',
       'goodbye'
     ),
-    name: $ => 'Bob'
+    name: $ => /[A-Za-z]+/
   }
 });
 

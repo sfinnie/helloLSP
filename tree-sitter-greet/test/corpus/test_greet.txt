@@ -1,12 +1,16 @@
 ================================
-Successful hello
+Successful hello & goodbye
 ================================
 
-hello Bob
+hello Petunia
+goodbye Benny
 
 ---
 
 (source_file
+  (greeting
+    salutation: (salutation)
+    name: (name))
   (greeting
     salutation: (salutation)
     name: (name)))

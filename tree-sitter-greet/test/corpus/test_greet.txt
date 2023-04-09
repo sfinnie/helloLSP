@@ -2,11 +2,11 @@
 Successful hello
 ================================
 
-hello Petunia
+hello Bob
 
 ---
 
 (source_file
   (greeting
-    (salutation)
-    (name)))
+    salutation: (salutation)
+    name: (name)))

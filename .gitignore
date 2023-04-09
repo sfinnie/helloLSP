@@ -7,4 +7,5 @@ venv/
 pygls.log
 server/__pycache__
 **/__pycache__/
+server/build
 

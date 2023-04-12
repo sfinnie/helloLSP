@@ -97,20 +97,27 @@ def _parse_greet(source: str):
  
     return diagnostics
 
+@greet_server.feature(TEXT_DOCUMENT_COMPLETION)
+def completion(ls: LanguageServer, params: CompletionParams):
+    return [
+        CompletionItem(label="hello"),
+        CompletionItem(label="world"),
+    ]
 
-@greet_server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
-def completions(params: Optional[CompletionParams] = None) -> CompletionList:
-    """Returns completion items."""
-    return CompletionList(
-        is_incomplete=False,
-        items=[
-            CompletionItem(label='"'),
-            CompletionItem(label='['),
-            CompletionItem(label=']'),
-            CompletionItem(label='{'),
-            CompletionItem(label='}'),
-        ]
-    )
+
+# @greet_server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
+# def completions(params: Optional[CompletionParams] = None) -> CompletionList:
+#     """Returns completion items."""
+#     return CompletionList(
+#         is_incomplete=False,
+#         items=[
+#             CompletionItem(label='"'),
+#             CompletionItem(label='['),
+#             CompletionItem(label=']'),
+#             CompletionItem(label='{'),
+#             CompletionItem(label='}'),
+#         ]
+#     )
 
 
 @greet_server.feature(TEXT_DOCUMENT_DID_CHANGE)

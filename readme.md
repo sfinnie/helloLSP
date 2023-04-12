@@ -847,7 +847,63 @@ It's largely as before.  The `contents` param is now set to an invalid greeting 
 
 #### Ensuring file is parsed when changed
 
-Remember that we want to parse the file when changed as well as when opened.  
+Remember that we want to parse the file when changed as well as when opened.  That means another pair of tests, checking for successful & unsuccessful parsing of a changed file.  Here's the successful one:
+
+```python
+@pytest.mark.asyncio
+async def test_parse_sucessful_on_file_change(client):
+    """Ensure that the server implements diagnostics correctly when a file is changed and the updated contents are valid."""
+
+    # given
+    test_uri = "file:///path/to/file.txt"
+    client.notify_did_open(
+        uri=test_uri, language="plaintext", contents="Hello B0b"
+    )
+    # Get diagnostics from file open before notifying change
+    await client.wait_for_notification(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+
+    # when
+    client.notify_did_change(
+        uri=test_uri, text="Hello Bob"
+    )
+    await client.wait_for_notification(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+
+    # then
+    assert test_uri in client.diagnostics
+    assert len(client.diagnostics[test_uri]) == 0
+```
+
+The LSP says a file must be notified as open before it can be changed, hence the need for `notify_did_open()` before calling `notify_did_change()`.  We await diagnostics from `notify_did_open()` before invoking `notify_did_change()`.  That clears diagnostics on the server from opening (note the contents on opening are set to an invalid greeting before correcting in the change).
+
+Here's the final test: ensuring the correct diagnostic is published when a greeting is changed from valid to invalid:
+
+```python
+@pytest.mark.asyncio
+async def test_parse_fails_on_file_change(client):
+    """Ensure that the server implements diagnostics correctly when a file is changed and the updated contents are invalid."""
+
+    # given
+    test_uri = "file:///path/to/file.txt"
+    client.notify_did_open(
+        uri=test_uri, language="plaintext", contents="Hello Bob"
+    )
+    # Get diagnostics from file open before notifying change
+    await client.wait_for_notification(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+
+    # when
+    client.notify_did_change(
+        uri=test_uri, text="Hello B0b"
+    )
+    await client.wait_for_notification(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+
+    assert test_uri in client.diagnostics
+    assert len(client.diagnostics[test_uri]) == 1
+    assert client.diagnostics[test_uri][0].message == "Greeting must be either 'Hello <name>' or 'Goodbye <name>'"
+```
+
+#### Wrapping up
+
+We now have some end-to-end tests that check parsing works correctly, both on initial open and on change.  We're not checking all the permutations of parsing because that's covered in the parser tests we created first.
 
 
 

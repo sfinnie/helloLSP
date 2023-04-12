@@ -905,6 +905,7 @@ async def test_parse_fails_on_file_change(client):
 
 We now have some end-to-end tests that check parsing works correctly, both on initial open and on change.  We're not checking all the permutations of parsing because that's covered in the parser tests we created first.
 
+The code at this point is tagged as [v0.3](https://github.com/sfinnie/helloLSP/releases/tag/v0.3).
 
 
 ## Extending the Language Grammar

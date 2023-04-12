@@ -755,21 +755,75 @@ If we're to test the server, there are a few pre-requisites we need to resolve:
 1. How do we start the server, and know it's started?
 1. How do we send it messages, and receive the responses?
 
+We could write this from first principles, constructing `json-rpc` messages directly.  However: that would be a lot of work.  It's also unnecessary.  The Language Server Protocol is symmetrical; so both client and server can send commands, receive responses and generate notifications.  That means we can reuse the protocol implementation in `pygls`.  It essentially means using an instance of the `pygls` server as a test client.  `pygls` does this itself for its own tests.  
+
+However, there's also [lsp-devtools](https://github.com/alcarney/lsp-devtools).  It provides a package - [pytest-lsp](https://pypi.org/project/pytest-lsp/) - that makes things a bit more convenient.  See [this discussion thread](https://github.com/openlawlibrary/pygls/discussions/320) for some background.
+
 #### Setup 
 
+First, we need to install `pytest-lsp`:
+
 ```bash
-$ python -m pip install pytest-lsp
+$ python3 -m pip install pytest-lsp
 ```
 
-#### Starting the server
+Let's also get rid of the tests in the original skeleton; we're not using them, and they cause an error unless pytest is run with `--ignore=server/tests`.  
 
-The skeleton project already provides a module for running the server standalone in [__main__.py](./server/__main__.py). The name __main__ has [special significance](https://docs.python.org/3/library/__main__.html) in Python and means we can start thr server from the project root as follows:
+```bash
+$ rm -rf server/tests
+```
+
+#### Parsing a valid file on opening
+
+Now we can create some end-to-end tests in [tests/test_server.py](tests/test_server.py).  Here's the setup and first test:
 
 ```python
-$ python -m server
+import sys
+import pytest
+import pytest_lsp
+from pytest_lsp import ClientServerConfig
+
+from lsprotocol.types import TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS
+
+@pytest_lsp.fixture(
+    config=ClientServerConfig(
+        server_command=[sys.executable, "-m", "server"],
+        root_uri="file:///path/to/test/project/root/"
+    ),
+)
+async def client():
+    pass
+
+
+@pytest.mark.asyncio
+async def test_parse_sucessful_on_file_open(client):
+    """Ensure that the server implements diagnostics correctly when a valid file is opened."""
+
+    test_uri = "file:///path/to/file.txt"
+    client.notify_did_open(
+        uri=test_uri, language="plaintext", contents="Hello Bob"
+    )
+
+    # Wait for the server to publish its diagnostics
+    await client.wait_for_notification(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+
+    assert test_uri in client.diagnostics
+    assert len(client.diagnostics[test_uri]) == 0
 ```
 
-By default, the server uses standard input & output for communication.  It can alternatively use tcp or websockets (have a look in the source file).  Whichever transport is selected, it starts an the `greet_server`.  Having run the command above, we have a running server.  How do we interact with it?
+The `@pytest_lsp.fixture` annotation takes care of setting up the client, starting the server, and establishing communications between them.  Note that the `root_uri` paramter is set to a sample value, but that doesn't matter: the server doesn't actually read the contents of the file from disk.  That's a deliberate design feature of LSP: the client passes the actual content to the server using the protocol itself.  That's because the client "owns" the file being edited.  Were the server to read it independently, it's likely the client and server would have different views of the file's contents due to e.g. file system caching.  So the client passes the actual file contents to the server in the `contents` parameter, as can be seen in the test:
+
+```python
+        uri=test_uri, language="plaintext", contents="Hello Bob"
+```
+
+`Hello Bob` is a valid greeting, so we expect there to be no diagnostics returned.  The test assertions check that.
+
+#### Parsing an invalid file on opening
+
+Now let's ensure we do get diagnostics published if the file contents are invalid.  
+
+
 
 ## Extending the Language Grammar
 

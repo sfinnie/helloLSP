@@ -738,6 +738,8 @@ def test_invalid_greeting_rejected(greeting):
     assert end.character == len(greeting)
 ```
 
+<a name="debate-test-error-message"></a>
+
 There's a bit of a question about whether we should test the error message.  The test is brittle, in that if we want to change the message, it means changing the text in two places.  Arguably a better answer would be to have the message in a separate structure that both the parser function and test referred to.  Against that, it's a bit less readable.  So, for now, we'll leave as is.  
 
 The test has also been parameterised to cover some obvious failures.  Are they enough?  That depends.  We could get smarter, for example using [Hypothesis](https://hypothesis.readthedocs.io/en/latest/) to generate test input rather than relying on 3 specific test cases.  For now, though, the cases we have give sufficient confidence for the purpose here: we're exploring building a language server, not best practice in test coverage.
@@ -821,7 +823,31 @@ The `@pytest_lsp.fixture` annotation takes care of setting up the client, starti
 
 #### Parsing an invalid file on opening
 
-Now let's ensure we do get diagnostics published if the file contents are invalid.  
+Now let's ensure we do get diagnostics published if the file contents are invalid.  Here's the new test:
+
+```python
+@pytest.mark.asyncio
+async def test_parse_fail_on_file_open(client):
+    """Ensure that the server implements diagnostics correctly when an invalid file is opened."""
+
+    test_uri = "file:///path/to/file.txt"
+    client.notify_did_open(
+        uri=test_uri, language="plaintext", contents="Hello Bob1"
+    )
+
+    # Wait for the server to publish its diagnostics
+    await client.wait_for_notification(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+
+    assert test_uri in client.diagnostics
+    assert len(client.diagnostics[test_uri]) == 1
+    assert client.diagnostics[test_uri][0].message == "Greeting must be either 'Hello <name>' or 'Goodbye <name>'"
+```
+
+It's largely as before.  The `contents` param is now set to an invalid greeting (`Hello Bob1` is invalid because numbers aren't allowed in names).  We now expect there to be a diagnostic published, so the length of the diagnostics array is 1.  The same [debate](#debate-test-error-message) exists here on checking the actual text of the message.  Again I've chose to replicate the text for simplicity of reading.
+
+#### Ensuring file is parsed when changed
+
+Remember that we want to parse the file when changed as well as when opened.  
 
 
 

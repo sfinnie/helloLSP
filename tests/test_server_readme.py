@@ -6,7 +6,8 @@ from pytest_lsp import ClientServerConfig
 @pytest_lsp.fixture(
     # scope='session',
     config=ClientServerConfig(
-        server_command=[sys.executable, "toy_server.py"],
+        # server_command=[sys.executable, "tests/toy_server.py"],
+        server_command=[sys.executable, "-m", "server"],
         root_uri="file:///path/to/test/project/root/"
     ),
 )

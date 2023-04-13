@@ -907,8 +907,57 @@ We now have some end-to-end tests that check parsing works correctly, both on in
 
 The code at this point is tagged as [v0.3](https://github.com/sfinnie/helloLSP/releases/tag/v0.3).
 
+## Adding more language features
 
-## Extending the Language Grammar
+Our simple `greet` language has been effective in getting a language server implementation up and running.  The LSP has a [lot more](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#languageFeatures) features that a language server can implement, for example:
+
+* [Go to Definition](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition): jump to the definition of a symbol from a point where it's referenced.
+* [Find References](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references): complements above by indicating all the places a given symbol is referenced
+
+The first two aren't relevant to `greet` in its current form: we don't define things and refer to them later.  We could, though, extend the language to do that.  Here's an example:
+
+```text
+name: Bob
+name: Dolly
+
+Goodbye Bob
+Hello Dolly
+```
+
+We've added `name` definitions, such that names have to be defined before they can be used in greetings.  It's a little prosaic, but it's simple and provides the basis for implementing "go to definition" and "find references".  What we'd like to happen is as follows:
+
+* If the user right clicks on "Bob" on the first line and selects "Find References", then "Bob" in "Goodbye Bob" is highlighted
+* If the user right-clicks on "Bob" in line 4 and selects "Go To Definition", then they end up back at line 1.
+
+The same applies for Dolly obviously.  That seems pretty simple.  But getting there is going to mean a fair bit of a detour into how our language server parses and stores the input file.
+
+
+### Extending the Language Grammar
+
+First off, let's extend the [greet BNF Grammar](#<a name="greet-grammar"></a>) we originally created.
+
+```bnf
+    statement   ::= definition | greeting
+    definition  ::= 'name:' name
+    greeting    ::= salutation name
+    salutation  ::= 'Hello' | 'Goodbye'
+    name        ::= [a-zA-Z]+
+```
+
+The first two lines are additions to the original grammar.  They say:
+
+* a `statement` is either a `definition` or a `greeting` (line 1)
+* a `definition` is the literal `name:` followed by a `name`
+
+It's worth noting a couple of things about the use of `name`:
+
+1. both `definition` and `greeting` refer to the same definition on the last line of the grammar.  That makes sense: we don't want different rules for what constitutes a valid name when defining it vs using it.
+1. Notwithstanding that, the grammar says nothing about a greeting referencing a name that's been defined.  Based on the grammar alone, the following would be valid:
+
+        name: Bob
+        Hello Dolly
+
+The grammar only specifies the language *syntax*.  It doesn't say anything about its *semantics*.   
 
 ```bash
 $ sudo apt install python3-dev
@@ -922,6 +971,9 @@ Commands:
 * `tree-sitter test`: run tests
 
 
+## Syntax Highlighting
+
+* [Semantics Tokens](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_semanticTokens): enhance colour coding of text.
 
 
 

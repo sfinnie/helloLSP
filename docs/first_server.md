@@ -491,7 +491,7 @@ def _parse_greet(source: str):
 
 The first thing to note is the grammar:
 
-<a name="language-regex"></a>
+(language-regex)=
 
 ```{code-block} python
 :linenos:

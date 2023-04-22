@@ -52,7 +52,7 @@ In words, that says:
 * A `name` is one or more letters, either lower or upper case.  Note there can't be any spaces between the letters: `Nellie` is fine but `Nellie bob` isn't[^3].
 
 [^3]: If the `name` definition is a bit puzzling, read it as follows: 
-    * `a-zA-Z` means any lower or upper case letter.  Read it as "a to z A to Z"
+    * `a-zA-Z` means any lower or upper case letter.  Read it as "any character in the range a to z or A to Z"
     * `[]+` means one or more (`+`) of the thing inside the square brackets `[]`.
 
 

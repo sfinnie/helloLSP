@@ -36,6 +36,8 @@ Though vscode calls these "extensions", I'm going to use "plugin" from here on i
 
 <a name="protocol-overview"></a>
 
+(protocol-overview)=
+
 ### Client-Server Interaction
 
 The client and server communicate using the language server protocol itself.  It defines two types of interactions:
@@ -103,7 +105,7 @@ It's entirely up to the server to decide what constitutes the definition.  Note,
 
 <a name="greet-language"></a>
 
-## The Language
+## The Greet Language
 
 If we're to implement a language *server*, we need a *language*.  Real language servers deal with programming languages.  Implementing programming languages is an entire body of theory and practice in itself.  We don't want to get diverted into that right now, so we'll start with something really simple.
 
@@ -121,7 +123,7 @@ That's it.  Each phrase consists of just two words: a *salutation* - "Hello" or 
 [^1]: It's common to formally describe the syntax of a programming language with a grammar, often defined in *Backus-Naur Format* (BNF).  See e.g. [wikipedia](https://en.wikipedia.org/wiki/Syntax_(programming_languages)) for more information.
 
 <a name="greet-grammar"></a>
-
+(greet-grammar)=
 ```bnf
     greeting    ::= salutation name
     salutation  ::= 'Hello' | 'Goodbye'

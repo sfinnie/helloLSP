@@ -12,8 +12,6 @@ First Language Server <first_server>
 Testing the Server <testing>
 ```
 
-Jump straight to {ref}`callouts` if you fancy.
-
 # Indices and tables
 
 * :ref:`genindex`

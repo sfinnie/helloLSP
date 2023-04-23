@@ -8,7 +8,7 @@ pygls.log
 server/__pycache__
 **/__pycache__/
 server/build
-docs/doctrees
+docsrc/_build
 
 
 

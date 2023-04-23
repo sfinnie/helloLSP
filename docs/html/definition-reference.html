@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Extending the Server: Definitions and References &#8212; HelloLSP  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Testing" href="testing.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="extending-the-server-definitions-and-references">
+<h1>Extending the Server: Definitions and References<a class="headerlink" href="#extending-the-server-definitions-and-references" title="Permalink to this heading">¶</a></h1>
+<p>Our simple <code class="docutils literal notranslate"><span class="pre">greet</span></code> language has been effective in getting a language server implementation up and running.  The LSP has a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#languageFeatures">lot more</a> features that a language server can implement, for example:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition">Go to Definition</a>: jump to the definition of a symbol from a point where it’s referenced.</p></li>
+<li><p><a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references">Find References</a>: complement to above which indicates all the places a given symbol is referenced</p></li>
+</ul>
+<p>These aren’t relevant to <code class="docutils literal notranslate"><span class="pre">greet</span></code> in its current form: we don’t currently define things and refer to them later.  We could, though, extend the language to do that.  Here’s an example:</p>
+<div class="highlight-text notranslate" id="extended-greet-example"><div class="highlight"><pre><span></span>name: Bob
+name: Dolly
+
+Goodbye Bob
+Hello Dolly
+</pre></div>
+</div>
+<p>We’ve added <code class="docutils literal notranslate"><span class="pre">name</span></code> definitions, such that names have to be defined before they can be used in greetings.  It’s a little prosaic, but it’s simple and provides the basis for implementing “go to definition” and “find references”.  What we’d like to happen is as follows:</p>
+<ul class="simple">
+<li><p>If the user right-clicks on “Bob” on the first line and selects “Find References”, then “Bob” in “Goodbye Bob” is highlighted</p></li>
+<li><p>If the user right-clicks on “Bob” in “Goodbye Bob” and selects “Go To Definition”, then they end up back at line 1.</p></li>
+</ul>
+<p>The same applies for Dolly obviously.  That seems pretty simple.  But getting there is going to mean a fair bit of a detour into how our language server parses and stores the input file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The LSP provides differentiates between <em>declaration</em> and <em>definition</em>.  A <em>declaration</em> is made when a symbol is introduced but not bound, for example <code class="docutils literal notranslate"><span class="pre">foo:</span> <span class="pre">str</span></code> in Python.  A <em>definition</em> both introduces a symbol and binds it to a value, e.g. <code class="docutils literal notranslate"><span class="pre">foo:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&quot;bar&quot;</span></code>.  Greet’s <code class="docutils literal notranslate"><span class="pre">name:</span></code> statements bind values for names, so definitions are appropriate.</p>
+</div>
+<section id="extending-the-language-grammar">
+<h2>Extending the Language Grammar<a class="headerlink" href="#extending-the-language-grammar" title="Permalink to this heading">¶</a></h2>
+<p>First off, let’s extend the <a class="reference internal" href="intro.html#greet-grammar"><span class="std std-ref">greet BNF Grammar</span></a> we originally created.</p>
+<div class="highlight-bnf notranslate" id="extended-greet-bnf"><div class="highlight"><pre><span></span><span class="hll"><span class="linenos">1</span>    statement   <span class="o">::=</span> definition | greeting
+</span><span class="hll"><span class="linenos">2</span>    definition  <span class="o">::=</span> &#39;name:&#39; name
+</span><span class="linenos">3</span>    greeting    <span class="o">::=</span> salutation name
+<span class="linenos">4</span>    salutation  <span class="o">::=</span> &#39;Hello&#39; | &#39;Goodbye&#39;
+<span class="linenos">5</span>    name        <span class="o">::=</span> [a-zA-Z]+
+</pre></div>
+</div>
+<p>The first two lines are additions to the original grammar (which otherwise remains the same).  They say:</p>
+<ul class="simple">
+<li><p>a <code class="docutils literal notranslate"><span class="pre">statement</span></code> in the language is either a <code class="docutils literal notranslate"><span class="pre">definition</span></code> or a <code class="docutils literal notranslate"><span class="pre">greeting</span></code> (line 1)</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">definition</span></code> is the literal <code class="docutils literal notranslate"><span class="pre">name:</span></code> followed by a <code class="docutils literal notranslate"><span class="pre">name</span></code> (line 2)</p></li>
+</ul>
+<p>It’s worth noting a couple of things about the use of <code class="docutils literal notranslate"><span class="pre">name</span></code>:</p>
+<ol class="arabic">
+<li><p>both <code class="docutils literal notranslate"><span class="pre">definition</span></code> and <code class="docutils literal notranslate"><span class="pre">greeting</span></code> refer to the same term on line 5 of the grammar.  That makes sense: we don’t want different rules for a valid name when defining it vs using it.</p></li>
+<li><p>Notwithstanding that, the grammar says nothing about a greeting referencing a name that’s been defined.  Based on the grammar alone, the following would be valid:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> name: Bob
+ Hello Dolly
+</pre></div>
+</div>
+</li>
+</ol>
+<p>The grammar only specifies the language <em>syntax</em>.  It doesn’t say anything about its <em>semantics</em> - its <em>meaning</em>.  We haven’t had to deal with semantics up to this point.  As humans reading the language, we understand it would break our new rules to greet someone whose name hasn’t been defined.  We need to fnd a way to encode that.</p>
+</section>
+<section id="bye-bye-regular-expressions-hello-parser-generator">
+<h2>Bye-bye regular expressions, hello parser-generator<a class="headerlink" href="#bye-bye-regular-expressions-hello-parser-generator" title="Permalink to this heading">¶</a></h2>
+<p>We <a class="reference internal" href="first_server.html#language-regex"><span class="std std-ref">implemented the original grammar</span></a> using a regular expression (regex).  As noted at the time, regexes are powerful but limited.  We could amend the regex to cover our enhanced grammar, but that has two limitations:</p>
+<ol class="arabic simple">
+<li><p>It gets complicated.  Regexes are notorious for being “write only”, meaning that trying to read them is hard.  Our original grammar is already pushing the boundaries; adding our new grammar rules would take us firmly into inscrutable territory.</p></li>
+<li><p>We need the locations of tokens in the file.  For example, we need to know that “Bob” occupies columns 7, 8 and 9 on line 1 in the <a class="reference internal" href="#extended-greet-example">example</a> (assuming we start counting at column 1, not 0).  Regexes don’t give us an easy way to do that.</p></li>
+</ol>
+<p>We could hand-write a parser.  We could instead use a <a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_parser_generators">parser-generator</a> that takes a definition of our grammar and creates a parser for us.  There are good reasons to use either approach; we’ll use the latter.  There are <a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_parser_generators">many parser-generators available</a>.  I’ve chosen to use <a class="reference external" href="https://tree-sitter.github.io/">tree-sitter</a> for a number of reasons:</p>
+<ol class="arabic simple">
+<li><p>It’s fast. It was originally created for the <a class="reference external" href="https://github.com/atom">Atom</a> editor, specifically for parsing and syntax highlighting programming languages.</p></li>
+<li><p>It’s easy to use (after a bit of setup)</p></li>
+<li><p>It has python bindings, meaning it’s easy to interact with from Python</p></li>
+</ol>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">HelloLSP</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="first_server.html">First Language Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing the Server</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Definitions and References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#extending-the-language-grammar">Extending the Language Grammar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bye-bye-regular-expressions-hello-parser-generator">Bye-bye regular expressions, hello parser-generator</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="testing.html" title="previous chapter">Testing</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, sfinnie.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/definition-reference.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

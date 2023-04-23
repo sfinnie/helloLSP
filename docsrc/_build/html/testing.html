@@ -1,0 +1,389 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Testing &#8212; HelloLSP  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Extending the Server: Definitions and References" href="definition-reference.html" />
+    <link rel="prev" title="A First Server" href="first_server.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="testing">
+<h1>Testing<a class="headerlink" href="#testing" title="Permalink to this heading">¶</a></h1>
+<p>We’re going to use <a class="reference external" href="https://pytest.org/">pytest</a> for testing, so let’s get that installed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pytest
+</pre></div>
+</div>
+<section id="testing-the-parser">
+<h2>Testing the Parser<a class="headerlink" href="#testing-the-parser" title="Permalink to this heading">¶</a></h2>
+<p>Let’s start with testing the parser itself, before we look at the server.  There are a few files to set up:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>touch<span class="w"> </span>conftest.py
+<span class="linenos">2</span>mkdir<span class="w"> </span>tests
+<span class="linenos">3</span>touch<span class="w"> </span>tests/test_parser.py
+</pre></div>
+</div>
+<p>Create the outline of the first test in <code class="docutils literal notranslate"><span class="pre">tests/test_parser.py</span></code>)`:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="linenos">2</span><span class="kn">from</span> <span class="nn">server</span> <span class="kn">import</span> <span class="n">server</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="k">def</span> <span class="nf">test_valid_greeting_accepted</span><span class="p">():</span>
+<span class="linenos">5</span>    
+<span class="linenos">6</span>    <span class="k">assert</span> <span class="kc">True</span> <span class="c1"># stub for now</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">conftest.py</span></code> lets <code class="docutils literal notranslate"><span class="pre">pytest</span></code> know this is the project root.  It’s needed so that <code class="docutils literal notranslate"><span class="pre">pytest</span></code> can resolve the <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">server</span> <span class="pre">import</span> <span class="pre">server</span></code> statement in <code class="docutils literal notranslate"><span class="pre">test_parser.py</span></code> above.</p>
+<p>Before we go any further, let’s make sure it’s working (we’ll ignore the tests that come with the skeleton - they’re out of sync with our implementation, and test things differently to what we’re going to cover):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>pytest<span class="w"> </span>--ignore<span class="o">=</span>server/tests
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="o">==============</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>session<span class="w"> </span><span class="nv">starts</span><span class="w"> </span><span class="o">==============</span>
+<span class="linenos"> 4</span>platform<span class="w"> </span>linux<span class="w"> </span>--<span class="w"> </span>Python<span class="w"> </span><span class="m">3</span>.10.6,<span class="w"> </span>pytest-7.2.1,<span class="w"> </span>pluggy-1.0.0
+<span class="linenos"> 5</span>rootdir:<span class="w"> </span>/home/sfinnie/projects/helloLSP
+<span class="linenos"> 6</span>plugins:<span class="w"> </span>typeguard-2.13.3
+<span class="linenos"> 7</span>collected<span class="w"> </span><span class="m">1</span><span class="w"> </span>item
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span>tests/test_parser.py<span class="w"> </span>.<span class="w"> </span><span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="o">==============</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>passed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.03s<span class="w"> </span><span class="o">==============</span><span class="w"> </span>
+</pre></div>
+</div>
+<section id="positive-tests">
+<h3>Positive Tests<a class="headerlink" href="#positive-tests" title="Permalink to this heading">¶</a></h3>
+<p>The parser is pretty simple but there’s that regular expression.  We really want to make sure it’s accepting what we want, and rejecting what we don’t.  Here’s the first test:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>import<span class="w"> </span>pytest
+<span class="linenos"> 2</span>from<span class="w"> </span>server<span class="w"> </span>import<span class="w"> </span>server
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>def<span class="w"> </span>test_valid_greeting_accepted<span class="o">()</span>:
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="nv">greeting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Hello Thelma&quot;</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="nv">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>server._parse_greet<span class="o">(</span>greeting<span class="o">)</span>
+<span class="linenos"> 9</span><span class="w">    </span>
+<span class="linenos">10</span><span class="w">    </span>assert<span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">[]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">_parse_greet()</span></code> returns a list of <code class="docutils literal notranslate"><span class="pre">Diagnostic</span></code> entries, where each entry denotes an error.  If the list is empty then there are no errors.  We also need to check for a valid greeting that uses “Goodbye” as the salutation.  Repeating the test is a bit wordy, but fortunately Pytest lets us <a class="reference external" href="https://docs.pytest.org/en/6.2.x/parametrize.html">parameterise the test</a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>import<span class="w"> </span>pytest
+<span class="linenos">2</span>from<span class="w"> </span>server<span class="w"> </span>import<span class="w"> </span>server
+<span class="linenos">3</span>
+<span class="linenos">4</span>@pytest.mark.parametrize<span class="o">(</span><span class="s2">&quot;greeting&quot;</span>,<span class="w"> </span><span class="o">[(</span><span class="s2">&quot;Hello Thelma&quot;</span><span class="o">)</span>,<span class="w"> </span><span class="o">(</span><span class="s2">&quot;Goodbye Louise&quot;</span><span class="o">)])</span>
+<span class="linenos">5</span>def<span class="w"> </span>test_valid_greeting_accepted<span class="o">(</span>greeting<span class="o">)</span>:
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="w">    </span><span class="nv">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>server._parse_greet<span class="o">(</span>greeting<span class="o">)</span>
+<span class="linenos">8</span><span class="w">    </span>
+<span class="linenos">9</span><span class="w">    </span>assert<span class="w"> </span><span class="nv">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">[]</span>
+</pre></div>
+</div>
+<p>We’re now passing 2 test cases into the same function: “Hello Thelma” and “Goodbye Louise”.  In both cases, we expect the answer to be an empty list.</p>
+<p>Let’s run the tests:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>pytest<span class="w"> </span>--ignore<span class="o">=</span>server/tests
+<span class="linenos"> 2</span><span class="o">==============</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>session<span class="w"> </span><span class="nv">starts</span><span class="w"> </span><span class="o">==============</span>
+<span class="linenos"> 3</span>platform<span class="w"> </span>linux<span class="w"> </span>--<span class="w"> </span>Python<span class="w"> </span><span class="m">3</span>.10.6,<span class="w"> </span>pytest-7.2.1,<span class="w"> </span>pluggy-1.0.0
+<span class="linenos"> 4</span>rootdir:<span class="w"> </span>/home/sfinnie/projects/helloLSP
+<span class="linenos"> 5</span>plugins:<span class="w"> </span>typeguard-2.13.3
+<span class="linenos"> 6</span>collected<span class="w"> </span><span class="m">2</span><span class="w"> </span>items
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>tests/test_parser.py<span class="w"> </span>..<span class="w"> </span><span class="o">[</span><span class="m">100</span>%<span class="o">]</span><span class="w"> </span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="o">==============</span><span class="w"> </span><span class="m">2</span><span class="w"> </span>passed<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">0</span>.47s<span class="w"> </span><span class="o">=================</span><span class="w"> </span>
+</pre></div>
+</div>
+<p>All good.  Note it says 2 tests passed: that confirms both test cases are being executed.</p>
+</section>
+<section id="negative-tests">
+<h3>Negative Tests<a class="headerlink" href="#negative-tests" title="Permalink to this heading">¶</a></h3>
+<p>We need to check the parser correctly identifies errors in invalid greetings.  After all, that’s a big part of the value we want the server to provide: telling us where we’ve gone wrong.  Here’s a first attempt:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">def</span> <span class="nf">test_invalid_greeting_rejected</span><span class="p">():</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span>    <span class="n">greeting</span> <span class="o">=</span> <span class="s2">&quot;Hell Thelma&quot;</span> <span class="c1"># should be Hello, not Hell</span>
+<span class="linenos">4</span>    <span class="n">result</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">_parse_greet</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
+<span class="linenos">5</span>    
+<span class="linenos">6</span>    <span class="k">assert</span> <span class="n">result</span> <span class="o">!=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<p>That’s fine, but it doesn’t check that the Diagnostic is correct.  Let’s do that:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;greeting&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;Wotcha Thelma&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Goodbye L0u1se&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Goodbye Louise again&quot;</span><span class="p">)])</span>
+<span class="linenos"> 2</span><span class="k">def</span> <span class="nf">test_invalid_greeting_rejected</span><span class="p">(</span><span class="n">greeting</span><span class="p">):</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span>    <span class="n">result</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">_parse_greet</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>    <span class="n">diagnostic</span><span class="p">:</span> <span class="n">Diagnostic</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos"> 9</span>    <span class="k">assert</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;Greeting must be either &#39;Hello &lt;name&gt;&#39; or &#39;Goodbye &lt;name&gt;&#39;&quot;</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>    <span class="n">start</span><span class="p">:</span> <span class="n">Position</span> <span class="o">=</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">range</span><span class="o">.</span><span class="n">start</span>
+<span class="linenos">12</span>    <span class="n">end</span><span class="p">:</span> <span class="n">Position</span> <span class="o">=</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">range</span><span class="o">.</span><span class="n">end</span>
+<span class="linenos">13</span>    
+<span class="linenos">14</span>    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">15</span>    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">character</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">16</span>    <span class="k">assert</span> <span class="n">end</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">17</span>    <span class="k">assert</span> <span class="n">end</span><span class="o">.</span><span class="n">character</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
+</pre></div>
+</div>
+<p id="debate-test-error-message">There’s a bit of a question about whether we should test the error message.  The test is brittle, in that if we want to change the message, it means changing the text in two places.  Arguably a better answer would be to have the message in a separate structure that both the parser function and test referred to.  Against that, it’s a bit less readable.  So, for now, we’ll leave as is.</p>
+<p>The test has also been parameterised to cover some obvious failures.  Are they enough?  That depends.  We could get smarter, for example using <a class="reference external" href="https://hypothesis.readthedocs.io/en/latest/">Hypothesis</a> to generate test input rather than relying on 3 specific test cases.  For now, though, the cases we have give sufficient confidence for the purpose here: we’re exploring building a language server, not best practice in test coverage.</p>
+</section>
+</section>
+<section id="testing-the-server">
+<h2>Testing the Server<a class="headerlink" href="#testing-the-server" title="Permalink to this heading">¶</a></h2>
+<p>The parser is the core of the implementation so far.  <code class="docutils literal notranslate"><span class="pre">pygls</span></code> provides most of the server implementation, handling communication with the client including marshalling and interpreting the <code class="docutils literal notranslate"><span class="pre">json-rpc</span></code> messages.  There’s little value in re-testing <code class="docutils literal notranslate"><span class="pre">pygls</span></code> here: it already has a solid set of tests.</p>
+<p>However: it <em>is</em> worth testing that we’ve wired up the parser correctly. We saw above that we need the parser to be called on both <code class="docutils literal notranslate"><span class="pre">textDocument/didOpen</span></code> and <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code>.  <code class="docutils literal notranslate"><span class="pre">pygls</span></code> can’t ensure that for us.  So there’s value in running some tests that ensure the full language server responds as expected in terms of <code class="docutils literal notranslate"><span class="pre">json-rpc</span></code> messages sent and received.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>I’ve deliberately avoided calling these “unit” or “integration” tests.  That’s a holy war that doesn’t want getting into here.</p>
+</div>
+<p>If we’re to test the server, there are a few pre-requisites we need to resolve:</p>
+<ol class="arabic simple">
+<li><p>How do we start the server, and know it’s started?</p></li>
+<li><p>How do we send it messages, and receive the responses?</p></li>
+</ol>
+<p>We could write this from first principles, constructing <code class="docutils literal notranslate"><span class="pre">json-rpc</span></code> messages directly.  That would be a lot of work though.  It’s also unnecessary.  The Language Server Protocol is symmetrical; so both client and server can send commands, receive responses and generate notifications.  That means we can reuse the protocol implementation in <code class="docutils literal notranslate"><span class="pre">pygls</span></code>.  It essentially means using an instance of the <code class="docutils literal notranslate"><span class="pre">pygls</span></code> server as a test client.  <code class="docutils literal notranslate"><span class="pre">pygls</span></code> does this itself for its own tests.</p>
+<p>However, there’s also <a class="reference external" href="https://github.com/alcarney/lsp-devtools">lsp-devtools</a>.  It provides <a class="reference external" href="https://pypi.org/project/pytest-lsp/">pytest-lsp</a>, a package that makes things a bit more convenient.  See <a class="reference external" href="https://github.com/openlawlibrary/pygls/discussions/320">this discussion thread</a> for some background.</p>
+<section id="setup">
+<h3>Setup<a class="headerlink" href="#setup" title="Permalink to this heading">¶</a></h3>
+<p>First, we need to install <code class="docutils literal notranslate"><span class="pre">pytest-lsp</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pytest-lsp
+</pre></div>
+</div>
+<p>Let’s also get rid of the tests in the original skeleton; we’re not using them, and they cause an error unless pytest is run with <code class="docutils literal notranslate"><span class="pre">--ignore=server/tests</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rm<span class="w"> </span>-rf<span class="w"> </span>server/tests
+</pre></div>
+</div>
+</section>
+<section id="parsing-a-valid-file-on-opening">
+<h3>Parsing a valid file on opening<a class="headerlink" href="#parsing-a-valid-file-on-opening" title="Permalink to this heading">¶</a></h3>
+<p>Now we can create some end-to-end tests in <code class="docutils literal notranslate"><span class="pre">tests/test_server.py</span></code>.  Here’s the setup and first test:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pytest_lsp</span>
+<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">pytest_lsp</span> <span class="kn">import</span> <span class="n">ClientServerConfig</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">from</span> <span class="nn">lsprotocol.types</span> <span class="kn">import</span> <span class="n">TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="nd">@pytest_lsp</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span>
+<span class="linenos"> 9</span>    <span class="n">config</span><span class="o">=</span><span class="n">ClientServerConfig</span><span class="p">(</span>
+<span class="linenos">10</span>        <span class="n">server_command</span><span class="o">=</span><span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;server&quot;</span><span class="p">],</span>
+<span class="linenos">11</span>        <span class="n">root_uri</span><span class="o">=</span><span class="s2">&quot;file:///path/to/test/project/root/&quot;</span>
+<span class="linenos">12</span>    <span class="p">),</span>
+<span class="linenos">13</span><span class="p">)</span>
+<span class="linenos">14</span><span class="k">async</span> <span class="k">def</span> <span class="nf">client</span><span class="p">():</span>
+<span class="linenos">15</span>    <span class="k">pass</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
+<span class="linenos">19</span><span class="k">async</span> <span class="k">def</span> <span class="nf">test_parse_sucessful_on_file_open</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="linenos">20</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that the server implements diagnostics correctly when a valid file is opened.&quot;&quot;&quot;</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span>    <span class="n">test_uri</span> <span class="o">=</span> <span class="s2">&quot;file:///path/to/file.txt&quot;</span>
+<span class="linenos">23</span>    <span class="n">client</span><span class="o">.</span><span class="n">notify_did_open</span><span class="p">(</span>
+<span class="linenos">24</span>        <span class="n">uri</span><span class="o">=</span><span class="n">test_uri</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;greet&quot;</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="s2">&quot;Hello Bob&quot;</span>
+<span class="linenos">25</span>    <span class="p">)</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="c1"># Wait for the server to publish its diagnostics</span>
+<span class="linenos">28</span>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">wait_for_notification</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS</span><span class="p">)</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span>    <span class="k">assert</span> <span class="n">test_uri</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span>
+<span class="linenos">31</span>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="n">test_uri</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">&#64;pytest_lsp.fixture</span></code> annotation takes care of setting up the client, starting the server, and establishing communications between them.  Note that the <code class="docutils literal notranslate"><span class="pre">root_uri</span></code> paramter is set to a sample value, but that doesn’t matter - the server doesn’t actually read the contents of the file from disk.  That’s a deliberate design feature of LSP: the client passes the actual content to the server using the protocol itself.  That’s because the client “owns” the file being edited.  Were the server to read it independently, it’s possible the client and server would have different views of the file’s contents due to e.g. file system caching.  So the client passes the actual file contents to the server in the <code class="docutils literal notranslate"><span class="pre">contents</span></code> parameter, as can be seen in the test:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">24</span>        <span class="n">uri</span><span class="o">=</span><span class="n">test_uri</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;greet&quot;</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="s2">&quot;Hello Bob&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Hello</span> <span class="pre">Bob</span></code> is a valid greeting, so we expect there to be no diagnostics returned.  The test assertions check that.</p>
+</section>
+<section id="parsing-an-invalid-file-on-opening">
+<h3>Parsing an invalid file on opening<a class="headerlink" href="#parsing-an-invalid-file-on-opening" title="Permalink to this heading">¶</a></h3>
+<p>Now let’s ensure we do get diagnostics published if the file contents are invalid.  Here’s the new test:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
+<span class="linenos"> 2</span><span class="k">async</span> <span class="k">def</span> <span class="nf">test_parse_fail_on_file_open</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that the server implements diagnostics correctly when an invalid file is opened.&quot;&quot;&quot;</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>    <span class="n">test_uri</span> <span class="o">=</span> <span class="s2">&quot;file:///path/to/file.txt&quot;</span>
+<span class="linenos"> 6</span>    <span class="n">client</span><span class="o">.</span><span class="n">notify_did_open</span><span class="p">(</span>
+<span class="linenos"> 7</span>        <span class="n">uri</span><span class="o">=</span><span class="n">test_uri</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;greet&quot;</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="s2">&quot;Hello Bob1&quot;</span>
+<span class="linenos"> 8</span>    <span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="c1"># Wait for the server to publish its diagnostics</span>
+<span class="linenos">11</span>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">wait_for_notification</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS</span><span class="p">)</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="k">assert</span> <span class="n">test_uri</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span>
+<span class="linenos">14</span>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="n">test_uri</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="linenos">15</span>    <span class="k">assert</span> <span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="n">test_uri</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;Greeting must be either &#39;Hello &lt;name&gt;&#39; or &#39;Goodbye &lt;name&gt;&#39;&quot;</span>
+</pre></div>
+</div>
+<p>It’s largely as before.  The <code class="docutils literal notranslate"><span class="pre">contents</span></code> param is now set to an invalid greeting (<code class="docutils literal notranslate"><span class="pre">Hello</span> <span class="pre">Bob1</span></code> is invalid because numbers aren’t allowed in names).  We now expect there to be a diagnostic published, so the length of the diagnostics array is 1.  The same <a class="reference internal" href="#debate-test-error-message">debate</a> exists here on checking the actual text of the message.  Again I’ve chose to replicate the text for simplicity of reading.</p>
+</section>
+<section id="ensuring-file-is-parsed-when-changed">
+<h3>Ensuring file is parsed when changed<a class="headerlink" href="#ensuring-file-is-parsed-when-changed" title="Permalink to this heading">¶</a></h3>
+<p>Remember that we want to parse the file when changed as well as when opened.  That means another pair of tests, checking for successful &amp; unsuccessful parsing of a changed file.  Here’s the successful one:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
+<span class="linenos"> 2</span><span class="k">async</span> <span class="k">def</span> <span class="nf">test_parse_sucessful_on_file_change</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that the server implements diagnostics correctly when a file is changed and the updated contents are valid.&quot;&quot;&quot;</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>    <span class="c1"># given</span>
+<span class="linenos"> 6</span>    <span class="n">test_uri</span> <span class="o">=</span> <span class="s2">&quot;file:///path/to/file.txt&quot;</span>
+<span class="linenos"> 7</span>    <span class="n">client</span><span class="o">.</span><span class="n">notify_did_open</span><span class="p">(</span>
+<span class="linenos"> 8</span>        <span class="n">uri</span><span class="o">=</span><span class="n">test_uri</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;greet&quot;</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="s2">&quot;Hello B0b&quot;</span>
+<span class="linenos"> 9</span>    <span class="p">)</span>
+<span class="linenos">10</span>    <span class="c1"># Get diagnostics from file open before notifying change</span>
+<span class="linenos">11</span>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">wait_for_notification</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS</span><span class="p">)</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="c1"># when</span>
+<span class="linenos">14</span>    <span class="n">client</span><span class="o">.</span><span class="n">notify_did_change</span><span class="p">(</span>
+<span class="linenos">15</span>        <span class="n">uri</span><span class="o">=</span><span class="n">test_uri</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Hello Bob&quot;</span>
+<span class="linenos">16</span>    <span class="p">)</span>
+<span class="linenos">17</span>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">wait_for_notification</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="c1"># then</span>
+<span class="linenos">20</span>    <span class="k">assert</span> <span class="n">test_uri</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span>
+<span class="linenos">21</span>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="n">test_uri</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>The LSP says a file must be notified as open before it can be changed, hence the need for <code class="docutils literal notranslate"><span class="pre">notify_did_open()</span></code> before calling <code class="docutils literal notranslate"><span class="pre">notify_did_change()</span></code>.  We await diagnostics from <code class="docutils literal notranslate"><span class="pre">notify_did_open()</span></code> before invoking <code class="docutils literal notranslate"><span class="pre">notify_did_change()</span></code>.  That clears diagnostics on the server from opening (note the contents on opening are set to an invalid greeting before correcting in the change).</p>
+<p>Here’s the final test: ensuring the correct diagnostic is published when a greeting is changed from valid to invalid:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
+<span class="linenos"> 2</span><span class="k">async</span> <span class="k">def</span> <span class="nf">test_parse_fails_on_file_change</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="linenos"> 3</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that the server implements diagnostics correctly when a file is changed and the updated contents are invalid.&quot;&quot;&quot;</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>    <span class="c1"># given</span>
+<span class="linenos"> 6</span>    <span class="n">test_uri</span> <span class="o">=</span> <span class="s2">&quot;file:///path/to/file.txt&quot;</span>
+<span class="linenos"> 7</span>    <span class="n">client</span><span class="o">.</span><span class="n">notify_did_open</span><span class="p">(</span>
+<span class="linenos"> 8</span>        <span class="n">uri</span><span class="o">=</span><span class="n">test_uri</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="s2">&quot;greet&quot;</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="s2">&quot;Hello Bob&quot;</span>
+<span class="linenos"> 9</span>    <span class="p">)</span>
+<span class="linenos">10</span>    <span class="c1"># Get diagnostics from file open before notifying change</span>
+<span class="linenos">11</span>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">wait_for_notification</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS</span><span class="p">)</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="c1"># when</span>
+<span class="linenos">14</span>    <span class="n">client</span><span class="o">.</span><span class="n">notify_did_change</span><span class="p">(</span>
+<span class="linenos">15</span>        <span class="n">uri</span><span class="o">=</span><span class="n">test_uri</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Hello B0b&quot;</span>
+<span class="linenos">16</span>    <span class="p">)</span>
+<span class="linenos">17</span>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">wait_for_notification</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="c1"># then</span>
+<span class="linenos">20</span>    <span class="k">assert</span> <span class="n">test_uri</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span>
+<span class="linenos">21</span>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="n">test_uri</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="linenos">22</span>    <span class="k">assert</span> <span class="n">client</span><span class="o">.</span><span class="n">diagnostics</span><span class="p">[</span><span class="n">test_uri</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;Greeting must be either &#39;Hello &lt;name&gt;&#39; or &#39;Goodbye &lt;name&gt;&#39;&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="wrapping-up">
+<h2>Wrapping up<a class="headerlink" href="#wrapping-up" title="Permalink to this heading">¶</a></h2>
+<p>We now have some end-to-end tests that check parsing works correctly, both on initial open and on change.  We’re not checking all the permutations of parsing because that’s covered in the parser tests we created first.</p>
+<p>The code at this point is tagged as <a class="reference external" href="https://github.com/sfinnie/helloLSP/releases/tag/v0.3">v0.3</a>.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">HelloLSP</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="first_server.html">First Language Server</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing the Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#testing-the-parser">Testing the Parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#positive-tests">Positive Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#negative-tests">Negative Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-the-server">Testing the Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setup">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parsing-a-valid-file-on-opening">Parsing a valid file on opening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parsing-an-invalid-file-on-opening">Parsing an invalid file on opening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ensuring-file-is-parsed-when-changed">Ensuring file is parsed when changed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#wrapping-up">Wrapping up</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="definition-reference.html">Definitions and References</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="first_server.html" title="previous chapter">A First Server</a></li>
+      <li>Next: <a href="definition-reference.html" title="next chapter">Extending the Server: Definitions and References</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, sfinnie.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/testing.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

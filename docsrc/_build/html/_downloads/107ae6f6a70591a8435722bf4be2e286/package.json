@@ -1,0 +1,75 @@
+{
+    "name": "greet",
+    "description": "Support for the greet salutation language",
+    "author": "sfinnie",
+    "repository": "https://github.com/sfinnie/helloLSP",
+    "license": "Apache-2.0",
+    "version": "0.0.1",
+    "publisher": "sfinnie",
+    "engines": {
+        "vscode": "^1.62.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onLanguage:greet"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "greet",
+                "aliases": [
+                    "Greet",
+                    "greet"
+                ],
+                "extensions": [
+                    ".greet"
+                ]
+            }
+        ],
+        "commands": [
+            {
+                "command": "progress",
+                "title": "Start the progress"
+            },
+            {
+                "command": "registerCompletions",
+                "title": "Register completions"
+            },
+            {
+                "command": "unregisterCompletions",
+                "title": "Unregister completions"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Greet Server Configuration",
+            "properties": {
+                "greetServer.exampleConfiguration": {
+                    "scope": "resource",
+                    "type": "string",
+                    "default": "Greet says you can override this message."
+                }
+            }
+        }
+    },
+    "main": "./client/out/extension",
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -b",
+        "watch": "tsc -b -w"
+    },
+    "devDependencies": {
+        "@types/node": "^16.11.6",
+        "@types/vscode": "^1.62.0",
+        "@typescript-eslint/eslint-plugin": "^5.3.0",
+        "@typescript-eslint/parser": "^5.3.0",
+        "eslint": "^8.2.0",
+        "typescript": "^4.4.4"
+    },
+    "dependencies": {
+        "tree-sitter-cli": "^0.20.8",
+        "vscode-languageclient": "^7.0.0"
+    }
+}

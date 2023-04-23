@@ -305,7 +305,7 @@ That's `package.json` done.  Let's do the client next.
 
 ### extension.ts
 
-The only relevant section in the client is in the `getClientOptions()` function that we update earlier.  Here's how it looks currently:
+The only relevant section in the client is in the `getClientOptions()` function that we updated earlier.  Here's how it looks currently:
 
 ```{code-block} typescript
 :linenos:
@@ -377,7 +377,7 @@ We'll start with checking that a `greet` file is consistent with the [greet gram
 
 ```{code-block} python
 :linenos:
-:emphasize-lines: 1, 5
+:emphasize-lines: 1, 4
 @greet_server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""

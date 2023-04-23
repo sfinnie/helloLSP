@@ -46,7 +46,7 @@
 <span class="linenos">3</span>touch<span class="w"> </span>tests/test_parser.py
 </pre></div>
 </div>
-<p>Create the outline of the first test in <code class="docutils literal notranslate"><span class="pre">tests/test_parser.py</span></code>)`:</p>
+<p>Create the outline of the first test in <code class="docutils literal notranslate"><span class="pre">tests/test_parser.py</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kn">import</span> <span class="nn">pytest</span>
 <span class="linenos">2</span><span class="kn">from</span> <span class="nn">server</span> <span class="kn">import</span> <span class="n">server</span>
 <span class="linenos">3</span>
@@ -128,20 +128,22 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;greeting&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;Wotcha Thelma&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Goodbye L0u1se&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Goodbye Louise again&quot;</span><span class="p">)])</span>
 <span class="linenos"> 2</span><span class="k">def</span> <span class="nf">test_invalid_greeting_rejected</span><span class="p">(</span><span class="n">greeting</span><span class="p">):</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span>    <span class="n">result</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">_parse_greet</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
-<span class="linenos"> 5</span>
-<span class="linenos"> 6</span>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span>    <span class="n">diagnostic</span><span class="p">:</span> <span class="n">Diagnostic</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="linenos"> 9</span>    <span class="k">assert</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;Greeting must be either &#39;Hello &lt;name&gt;&#39; or &#39;Goodbye &lt;name&gt;&#39;&quot;</span>
-<span class="linenos">10</span>
-<span class="linenos">11</span>    <span class="n">start</span><span class="p">:</span> <span class="n">Position</span> <span class="o">=</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">range</span><span class="o">.</span><span class="n">start</span>
-<span class="linenos">12</span>    <span class="n">end</span><span class="p">:</span> <span class="n">Position</span> <span class="o">=</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">range</span><span class="o">.</span><span class="n">end</span>
-<span class="linenos">13</span>    
-<span class="linenos">14</span>    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">0</span>
-<span class="linenos">15</span>    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">character</span> <span class="o">==</span> <span class="mi">0</span>
-<span class="linenos">16</span>    <span class="k">assert</span> <span class="n">end</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">0</span>
-<span class="linenos">17</span>    <span class="k">assert</span> <span class="n">end</span><span class="o">.</span><span class="n">character</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
+<span class="linenos"> 4</span>    <span class="c1"># when</span>
+<span class="linenos"> 5</span>    <span class="n">result</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">_parse_greet</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span>    <span class="c1"># then</span>
+<span class="linenos"> 8</span>    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="n">diagnostic</span><span class="p">:</span> <span class="n">Diagnostic</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">11</span>    <span class="k">assert</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;Greeting must be either &#39;Hello &lt;name&gt;&#39; or &#39;Goodbye &lt;name&gt;&#39;&quot;</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="n">start</span><span class="p">:</span> <span class="n">Position</span> <span class="o">=</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">range</span><span class="o">.</span><span class="n">start</span>
+<span class="linenos">14</span>    <span class="n">end</span><span class="p">:</span> <span class="n">Position</span> <span class="o">=</span> <span class="n">diagnostic</span><span class="o">.</span><span class="n">range</span><span class="o">.</span><span class="n">end</span>
+<span class="linenos">15</span>    
+<span class="linenos">16</span>    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">17</span>    <span class="k">assert</span> <span class="n">start</span><span class="o">.</span><span class="n">character</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">18</span>    <span class="k">assert</span> <span class="n">end</span><span class="o">.</span><span class="n">line</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="linenos">19</span>    <span class="k">assert</span> <span class="n">end</span><span class="o">.</span><span class="n">character</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
 </pre></div>
 </div>
 <p id="debate-test-error-message">There’s a bit of a question about whether we should test the error message.  The test is brittle, in that if we want to change the message, it means changing the text in two places.  Arguably a better answer would be to have the message in a separate structure that both the parser function and test referred to.  Against that, it’s a bit less readable.  So, for now, we’ll leave as is.</p>

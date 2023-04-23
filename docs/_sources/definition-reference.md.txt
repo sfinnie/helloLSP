@@ -25,14 +25,14 @@ We've added `name` definitions, such that names have to be defined before they c
 The same applies for Dolly obviously.  That seems pretty simple.  But getting there is going to mean a fair bit of a detour into how our language server parses and stores the input file.
 
 ```{note}
-The LSP provides differentiates between *declaration* and *definition*.  A *declaration* is made when a symbol is introduced but not bound, for example `foo: str` in Python.  A *definition* both introduces a symbol and binds it to a value, e.g. `foo: str = "bar"`.  Greet's `name:` statements bind values for names, so definitions are appropriate.
+The LSP differentiates between *declaration* and *definition*.  A *declaration* is made when a symbol is introduced but not bound, for example `foo: str` in Python.  A *definition* both introduces a symbol and binds it to a value, e.g. `foo: str = "bar"`.  Greet's `name:` statements bind values for names, so definitions are appropriate here.
 ```
 
 ## Extending the Language Grammar
 
 First off, let's extend the [greet BNF Grammar](#greet-grammar) we originally created.
 
-(extended-greet-bnf")=
+(extended-greet-bnf)=
 
 ```{code-block} bnf
 :linenos:

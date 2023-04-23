@@ -1,6 +1,6 @@
 # Adventures with the Language Server Protocol
 
-A practical guide to the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) (LSP).  The guide builds a language server incrementally, in Python, using the [pygls](https://pygls.readthedocs.io/en/latest/) library.
+A practical guide to the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) (LSP).  The guide builds a language server incrementally, in Python, using the [pygls](https://pygls.readthedocs.io/en/latest/) library.  
 
 
 ```{toctree}

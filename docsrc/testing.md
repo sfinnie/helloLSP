@@ -18,7 +18,7 @@ mkdir tests
 touch tests/test_parser.py
 ```
 
-Create the outline of the first test in `tests/test_parser.py`)`:
+Create the outline of the first test in `tests/test_parser.py`:
 
 ```{code-block} python
 :linenos:
@@ -123,8 +123,10 @@ That's fine, but it doesn't check that the Diagnostic is correct.  Let's do that
 @pytest.mark.parametrize("greeting", [("Wotcha Thelma"), ("Goodbye L0u1se"), ("Goodbye Louise again")])
 def test_invalid_greeting_rejected(greeting):
 
+    # when
     result = server._parse_greet(greeting)
 
+    # then
     assert len(result) == 1
 
     diagnostic: Diagnostic = result[0]

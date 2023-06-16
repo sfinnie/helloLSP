@@ -7,8 +7,8 @@ from lsprotocol.types import TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS
 
 @pytest_lsp.fixture(
     config=ClientServerConfig(
-        server_command=[sys.executable, "-m", "server"],
-        root_uri="file:///path/to/test/project/root/"
+        server_command=[sys.executable, "-m", "server"]
+        # root_uri="file:///path/to/test/project/root/"
     ),
 )
 async def client():

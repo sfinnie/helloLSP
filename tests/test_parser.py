@@ -2,6 +2,7 @@ import pytest
 from server import server
 from lsprotocol.types import Diagnostic, Range, Position
 
+
 @pytest.mark.parametrize("greeting", [("Hello Thelma"), ("Goodbye Louise")])
 def test_valid_greeting_accepted(greeting):
 

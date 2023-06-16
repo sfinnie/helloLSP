@@ -66,8 +66,19 @@ We [implemented the original grammar](language-regex) using a regular expression
 1. It gets complicated.  Regexes are notorious for being "write only", meaning that trying to read them is hard.  Our original grammar is already pushing the boundaries; adding our new grammar rules would take us firmly into inscrutable territory.
 1. We need the locations of tokens in the file.  For example, we need to know that "Bob" occupies columns 7, 8 and 9 on line 1 in the [example](#extended-greet-example) (assuming we start counting at column 1, not 0).  Regexes don't give us an easy way to do that.
 
-We could hand-write a parser.  We could instead use a [parser-generator](https://en.wikipedia.org/wiki/Comparison_of_parser_generators) that takes a definition of our grammar and creates a parser for us.  There are good reasons to use either approach; we'll use the latter.  There are [many parser-generators available](https://en.wikipedia.org/wiki/Comparison_of_parser_generators).  I've chosen to use [tree-sitter](https://tree-sitter.github.io/) for a number of reasons:
+We could hand-write a parser.  We could instead use a [parser-generator](https://en.wikipedia.org/wiki/Comparison_of_parser_generators) that takes a definition of our grammar and creates a parser for us.  There are good reasons to use either approach; we'll use the latter.  There are [many parser-generators available](https://en.wikipedia.org/wiki/Comparison_of_parser_generators).  I've chosen to use [Lark](https://github.com/lark-parser/lark) for a number of reasons:
 
-1. It's fast. It was originally created for the [Atom](https://github.com/atom) editor, specifically for parsing and syntax highlighting programming languages.
-1. It's easy to use (after a bit of setup)
-1. It has python bindings, meaning it's easy to interact with from Python
+1. It installs as a Python library, so setup is easy
+1. It's easy to use
+1. A Lark grammar specification looks quite similar to our BNF definition.
+1. It's [well documented](https://lark-parser.readthedocs.io/en/latest/).
+
+# Installing Lark
+
+Installation is easy:
+
+```bash
+python3 -m pip install lark
+```
+
+

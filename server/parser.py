@@ -1,9 +1,11 @@
 from lark import Lark
 
 grammar = r"""
-name_decl : "name" ESCAPED_STRING
+name_decl : "name:" NAME
 
-%import common.ESCAPED_STRING
+NAME: LETTER+
+
+%import common.LETTER
 %import common.WS
 %ignore WS
 """

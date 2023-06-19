@@ -1,6 +1,19 @@
 import pytest
 from server import server
+from server.parser import greet_parser
 from lsprotocol.types import Diagnostic, Range, Position
+
+from lark.exceptions import UnexpectedCharacters
+
+def test_parse_valid_name_decl_succeeds():
+    greeting = "name: Thelma"
+    greet_parser.parse(greeting)
+
+
+def parse_invalid_name_decl_fails():
+    greeting = "name: Thelma24"
+    with pytest.raises(UnexpectedCharacters) as e:
+        greet_parser.parse(greeting)
 
 
 @pytest.mark.parametrize("greeting", [("Hello Thelma"), ("Goodbye Louise")])

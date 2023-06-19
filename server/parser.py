@@ -1,19 +1,21 @@
 from lark import Lark, UnexpectedInput
 
 grammar = r"""
-start : statement+
+start       : statement+
 
-statement : name_decl | greeting
+statement   : name_decl 
+            | greeting
 
-name_decl : "name:" NAME
+name_decl   : "name:" NAME
 
-greeting : salutation NAME
+greeting    : salutation NAME
 
-salutation : HELLO | GOODBYE
+salutation  : HELLO 
+            | GOODBYE
 
-NAME: LETTER+
-HELLO: "Hello"
-GOODBYE: "Goodbye"
+NAME        : LETTER+
+HELLO       : "Hello"
+GOODBYE     : "Goodbye"
 
 %import common.LETTER
 %import common.WS

@@ -12,7 +12,3 @@ def completion(ls: LanguageServer, params: CompletionParams):
         CompletionItem(label="hello"),
         CompletionItem(label="world"),
     ]
-
-
-if __name__ == "__main__":
-    server.start_io()

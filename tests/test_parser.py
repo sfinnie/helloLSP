@@ -1,23 +1,24 @@
 import pytest
 from server import server
-from server.parser import greet_parser
+from server.parser import parse, GreetSyntaxError
 from lsprotocol.types import Diagnostic, Range, Position
 
-from lark.exceptions import UnexpectedCharacters
 
 def test_parse_valid_name_decl_succeeds():
     decl = "name: Thelma"
-    greet_parser.parse(decl)
+    parse(decl)
 
 
-def parse_invalid_name_decl_fails():
+def test_parse_invalid_name_decl_fails():
     decl = "name: Thelma24"
-    with pytest.raises(UnexpectedCharacters) as e:
-        greet_parser.parse(decl)
+    with pytest.raises(GreetSyntaxError) as e:
+        parse(decl)
 
 
-def parse_valid_greeting():
-    g
+def test_parse_valid_greeting():
+    greeting = "Hello Thelma"
+    parse(greeting)
+
 
 @pytest.mark.parametrize("greeting", [("Hello Thelma"), ("Goodbye Louise")])
 def test_valid_greeting_accepted(greeting):

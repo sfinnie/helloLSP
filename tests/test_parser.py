@@ -1,6 +1,6 @@
 import pytest
 from server import server
-from server.parser import parse, GreetSyntaxError
+from server.lark_parser import parse, GreetSyntaxError
 from lsprotocol.types import Diagnostic, Range, Position
 
 

@@ -104,6 +104,7 @@ Here's a typical response (again from the [official docs](https://microsoft.gith
 It's entirely up to the server to decide what constitutes the definition.  Note, again, the use of line and column to define position.
 
 <a name="greet-language"></a>
+(greet-language)=
 
 ## The Greet Language
 

@@ -229,7 +229,7 @@ Launching the development instance, typing `ctrl-shift-p` and entering "countdow
 
 ## Naming: enough, already, Json
 
-The skeleton is based on suport for `json` files, and that's used throughout `client/src/extension.ts`, `server/server.py` and `package.json`.
+The skeleton is based on support for `json` files, and that's used throughout `client/src/extension.ts`, `server/server.py` and `package.json`.
 
 
 ### Package.json
@@ -455,6 +455,8 @@ Not unreasonably, Python's standard library doesn't have a built-in function for
     1. If so, is it followed by a name that satisfies the `[a-zA-Z]+` pattern?
 
 Here's the implementation:
+
+(regex-based-greet-parser)=
 
 ```{code-block} python
 :linenos:

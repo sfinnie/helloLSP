@@ -54,19 +54,38 @@ It's worth noting a couple of things about the use of `name`:
 1. both `definition` and `greeting` refer to the same term on line 5 of the grammar.  That makes sense: we don't want different rules for a valid name when defining it vs using it.
 1. Notwithstanding that, the grammar says nothing about a greeting referencing a name that's been defined.  Based on the grammar alone, the following would be valid:
 
-        name: Bob
+        Name: Bob
         Hello Dolly
 
 The grammar only specifies the language *syntax*.  It doesn't say anything about its *semantics* - its *meaning*.  We haven't had to deal with semantics up to this point.  As humans reading the language, we understand it would break our new rules to greet someone whose name hasn't been defined.  We need to fnd a way to encode that.
 
 ## Starting with an end in mind
 
-Before we get into how to extend our code, it's worth being clear on what we want from the output.  We want two things:
+Before we get into how to extend our code, it's worth being clear on what we want from the output.  We want three things:
 
-1. To ensure the file contents are valid, and, if not, report diagnostics as appropriate;
-1. To support definitions and lookups
+1. To ensure the file contents are valid, and, if not, report diagnostics as appropriate when we receive the `textDocument/didChange` notification;
+1. To return the definition location when we receive a [textDocument/definition](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition) request;
+1. To return the reference location(s) when we receive a [textDocument/references](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references) request.
 
-We have an implementation of (1) in [the parser we built in Chapter 2](regex-based-greet-parser).  We'll need to extend it though, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn't defined.
+We have an implementation of (1) in [the parser we built in Chapter 2](#regex-based-greet-parser).  We'll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn't defined.  We'll come to that in a bit.
+
+Diagnostics are handled by notifications; we receive the `textDocument/didChange` and send back a `textDocument/diagnostic` notification. Definitions and References are both commands that expect a response.  Let's start with `definition`.  Here's its skeleton:
+
+```{code-block} python
+@greet_server.feature(TEXT_DOCUMENT_DEFINITION)
+def definition(ls: GreetLanguageServer,  params: DefinitionParams) -> LocationLink | None:
+```
+
+
+
+
+To support definitions and lookups, we'll need some form of data structure that lets us navigate from one place to another in the file.  Each requires us to process the source file.  It's helpful to think of the output we need each time we process the file contents:
+
+1. A collection of zero or more `Diagnostics`, each defining and describing an error in the file, and
+1. A way to map name references to their definitions, and vice-versa.
+
+The shape of Diagnostics are defined for us by the LSP and implemented by `lsprotocol.types.Diagnostic`.   We've seen it before in the [initial parser](#regex-based-greet-parser).  
+
 
 ## Bye-bye regular expressions, hello parser-generator
 

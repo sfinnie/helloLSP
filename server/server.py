@@ -27,7 +27,7 @@ from typing import List, Optional
 # Command and notification names
 from lsprotocol.types import (TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
                                TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN,
-                               TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_REFERENCES,
+                               TEXT_DOCUMENT_REFERENCES,
                                TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL)
 
 # Datatypes passed in commands/responses/notifications
@@ -42,8 +42,6 @@ from lsprotocol.types import (CompletionItem, CompletionList, CompletionOptions,
                               Range, 
                               DidCloseTextDocumentParams,
 
-                              # 
-                              DefinitionLink,
                               MessageType, Position,
                               Registration, RegistrationParams,
                               SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
@@ -51,6 +49,12 @@ from lsprotocol.types import (CompletionItem, CompletionList, CompletionOptions,
                               WorkDoneProgressBegin, WorkDoneProgressEnd,
                               WorkDoneProgressReport,
                               WorkspaceConfigurationParams)
+
+# textDocument/definition: return the location where a symbol is defined
+from lsprotocol.types import ( TEXT_DOCUMENT_DEFINITION, # command alias
+                               DefinitionParams,         # command params
+                               LocationLink)             # response
+
 from pygls.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10
@@ -136,9 +140,22 @@ def references(ls: GreetLanguageServer):
 
 
 @greet_server.feature(TEXT_DOCUMENT_DEFINITION)
-def definition(ls: GreetLanguageServer) -> DefinitionLink:
-    """returns the location where the specified token is defined (if found)"""
-    pass
+def definition(ls: GreetLanguageServer,  params: DefinitionParams) -> LocationLink | None:
+    """returns the location where the specified token is defined if found,
+       None otherwise
+    """
+    origin_range = Range(start=params.position,
+                         end=Position(line=params.position.line, 
+                                      character=params.position.character+1))
+    
+    definition_range = Range(start=Position(line=0, character=6),
+                             end=Position(line=0, character=11))
+    
+    loc = LocationLink(target_uri=params.text_document.uri,
+                       origin_selection_range=origin_range,
+                       target_range=definition_range,
+                       target_selection_range=definition_range)
+    return loc
 
 
 # ---------------------------------------------------------------------------

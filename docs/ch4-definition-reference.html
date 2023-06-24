@@ -74,7 +74,7 @@ Hello Dolly
 <ol class="arabic">
 <li><p>both <code class="docutils literal notranslate"><span class="pre">definition</span></code> and <code class="docutils literal notranslate"><span class="pre">greeting</span></code> refer to the same term on line 5 of the grammar.  That makes sense: we don’t want different rules for a valid name when defining it vs using it.</p></li>
 <li><p>Notwithstanding that, the grammar says nothing about a greeting referencing a name that’s been defined.  Based on the grammar alone, the following would be valid:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> name: Bob
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> Name: Bob
  Hello Dolly
 </pre></div>
 </div>
@@ -84,12 +84,24 @@ Hello Dolly
 </section>
 <section id="starting-with-an-end-in-mind">
 <h2>Starting with an end in mind<a class="headerlink" href="#starting-with-an-end-in-mind" title="Permalink to this heading">¶</a></h2>
-<p>Before we get into how to extend our code, it’s worth being clear on what we want from the output.  We want two things:</p>
+<p>Before we get into how to extend our code, it’s worth being clear on what we want from the output.  We want three things:</p>
 <ol class="arabic simple">
-<li><p>To ensure the file contents are valid, and, if not, report diagnostics as appropriate;</p></li>
-<li><p>To support definitions and lookups</p></li>
+<li><p>To ensure the file contents are valid, and, if not, report diagnostics as appropriate when we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> notification;</p></li>
+<li><p>To return the definition location when we receive a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition">textDocument/definition</a> request;</p></li>
+<li><p>To return the reference location(s) when we receive a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references">textDocument/references</a> request.</p></li>
 </ol>
-<p>We have an implementation of (1) in <a class="reference internal" href="ch2-first-server.html#regex-based-greet-parser"><span class="std std-ref">the parser we built in Chapter 2</span></a>.  We’ll need to extend it though, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn’t defined.</p>
+<p>We have an implementation of (1) in <a class="reference internal" href="ch2-first-server.html#regex-based-greet-parser"><span class="std std-ref">the parser we built in Chapter 2</span></a>.  We’ll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn’t defined.  We’ll come to that in a bit.</p>
+<p>Diagnostics are handled by notifications; we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> and send back a <code class="docutils literal notranslate"><span class="pre">textDocument/diagnostic</span></code> notification. Definitions and References are both commands that expect a response.  Let’s start with <code class="docutils literal notranslate"><span class="pre">definition</span></code>.  Here’s its skeleton:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@greet_server</span><span class="o">.</span><span class="n">feature</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_DEFINITION</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">definition</span><span class="p">(</span><span class="n">ls</span><span class="p">:</span> <span class="n">GreetLanguageServer</span><span class="p">,</span>  <span class="n">params</span><span class="p">:</span> <span class="n">DefinitionParams</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocationLink</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>To support definitions and lookups, we’ll need some form of data structure that lets us navigate from one place to another in the file.  Each requires us to process the source file.  It’s helpful to think of the output we need each time we process the file contents:</p>
+<ol class="arabic simple">
+<li><p>A collection of zero or more <code class="docutils literal notranslate"><span class="pre">Diagnostics</span></code>, each defining and describing an error in the file, and</p></li>
+<li><p>A way to map name references to their definitions, and vice-versa.</p></li>
+</ol>
+<p>The shape of Diagnostics are defined for us by the LSP and implemented by <code class="docutils literal notranslate"><span class="pre">lsprotocol.types.Diagnostic</span></code>.   We’ve seen it before in the <a class="reference internal" href="ch2-first-server.html#regex-based-greet-parser"><span class="std std-ref">initial parser</span></a>.</p>
 </section>
 <section id="bye-bye-regular-expressions-hello-parser-generator">
 <h2>Bye-bye regular expressions, hello parser-generator<a class="headerlink" href="#bye-bye-regular-expressions-hello-parser-generator" title="Permalink to this heading">¶</a></h2>

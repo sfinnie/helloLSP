@@ -29,18 +29,6 @@
             }
         ],
         "commands": [
-            {
-                "command": "progress",
-                "title": "Start the progress"
-            },
-            {
-                "command": "registerCompletions",
-                "title": "Register completions"
-            },
-            {
-                "command": "unregisterCompletions",
-                "title": "Unregister completions"
-            }
         ],
         "configuration": {
             "type": "object",

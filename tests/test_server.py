@@ -24,7 +24,7 @@ def event_loop():
 
 
 @pytest_lsp.fixture(
-    config=ClientServerConfig(server_command=[sys.executable, "-m", "server"]),
+    config=ClientServerConfig(server_command=[sys.executable, "-m", "server.server"]),
 )
 async def client(lsp_client: LanguageClient):
     # Setup

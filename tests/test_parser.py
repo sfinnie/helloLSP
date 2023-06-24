@@ -3,6 +3,14 @@ from server import server
 from server.lark_parser import parse, GreetSyntaxError
 from lsprotocol.types import Diagnostic, Range, Position
 
+error_examples = [
+    "nam: Bobby",               # invalid token 0.  Can't say anything more about it without fuzzy matching.
+    "name Frederic",            # invalid token 0.  As above.
+    "name: Bobby McFadyen",     # invalid name declaration statement
+    "name: Bobby24",            # invalid name declaration statement
+    
+    ""
+]
 
 def test_parse_valid_name_decl_succeeds():
     decl = "name: Thelma"

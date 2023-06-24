@@ -9,11 +9,15 @@ from lsprotocol.types import TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS
 from lsprotocol.types import ClientCapabilities
 from lsprotocol.types import InitializeParams
 
+from lsprotocol.types import DefinitionParams
+
 from lsprotocol.types import CompletionParams, Position, TextDocumentIdentifier, CompletionList
+
+from server.server import definition
 
 
 @pytest_lsp.fixture(
-    config=ClientServerConfig(server_command=[sys.executable, "toy_server.py"]),
+    config=ClientServerConfig(server_command=[sys.executable, "-m", "server.server"]),
 )
 async def client(lsp_client: LanguageClient):
     # Setup
@@ -25,6 +29,9 @@ async def client(lsp_client: LanguageClient):
     # Teardown
     await lsp_client.shutdown_session()
 
+# -------------------------------------------------------------------
+# Completions
+# -------------------------------------------------------------------
 
 @pytest.mark.skip(reason="awaiting resolution of pytest-lsp issues")
 async def test_completions(client: LanguageClient):
@@ -55,6 +62,33 @@ async def test_completion(client):
 
     assert len(result) == 2
 
+# -------------------------------------------------------------------
+# Definitions & References
+# -------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_invalid_reference_returns_None(client: LanguageClient):
+    
+    #arrange
+    params: DefinitionParams
+
+    params.text_document = TextDocumentIdentifier(uri = "./valid.greet")
+    params.position = Position(line=3, character=1)
+
+    #act
+    rsp = definition(client, DefinitionParams)
+
+    #assert
+    assert rsp is None 
+
+
+
+
+
+
+# -------------------------------------------------------------------
+# Diagnostics (AKA errors & warnings)
+# -------------------------------------------------------------------
 
 @pytest.mark.skip(reason="awaiting resolution of pytest-lsp issues")
 @pytest.mark.asyncio

@@ -15,11 +15,7 @@
 # limitations under the License.                                           #
 ############################################################################
 import argparse
-import logging
-
 from .server import server
-
-logging.basicConfig(filename="greetls.log", level=logging.DEBUG, filemode="w")
 
 
 def add_arguments(parser):

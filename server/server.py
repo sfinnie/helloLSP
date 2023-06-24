@@ -22,6 +22,9 @@ from lsprotocol.types import CompletionItem
 from lsprotocol.types import CompletionParams
 from pygls.server import LanguageServer
 
+import logging
+logging.basicConfig(filename="greetls.log", level=logging.DEBUG, filemode="w")
+
 
 class GreetLanguageServer(LanguageServer):
     """entry point for the `greet` language server"""
@@ -31,7 +34,6 @@ class GreetLanguageServer(LanguageServer):
     def __init__(self, *args):
         super().__init__(*args)
         self.show_message_log("Greet Language Server started")
-        print("Greet Language Server started")
 
 server = GreetLanguageServer("greet-language-server", "v0.1")
 

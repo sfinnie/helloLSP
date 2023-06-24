@@ -4,7 +4,7 @@ client/server
 .vscode-test
 venv/
 .idea/
-pygls.log
+greetls.log
 server/__pycache__
 **/__pycache__/
 server/build

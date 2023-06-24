@@ -334,34 +334,44 @@ That's it for the client - onto the server.
 
 ### server.py
 
-The change in the server is the main language server class:
+Here's the full implementation for our first version of the server:
 
 ```{code-block} python
 :linenos:
-class JsonLanguageServer(LanguageServer):
-    CMD_PROGRESS = 'progress'
-    #...
+from lsprotocol.types import TEXT_DOCUMENT_COMPLETION
+from lsprotocol.types import CompletionItem
+from lsprotocol.types import CompletionParams
+from pygls.server import LanguageServer
 
-json_server = JsonLanguageServer('pygls-json-example', 'v0.1')
-```
+import logging
+logging.basicConfig(filename="greetls.log", level=logging.DEBUG, filemode="w")
 
-Unsurprisingly, that becomes:
 
-```{code-block} python
-:linenos:
-:emphasize-lines: 1, 5
 class GreetLanguageServer(LanguageServer):
-    CMD_PROGRESS = 'progress'
-    #...
+    """entry point for the `greet` language server"""
 
-greet_server = GreetLanguageServer('pygls-greet-example', 'v0.1')
+    CONFIGURATION_SECTION = 'greetServer'
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.show_message_log("Greet Language Server started")
+
+server = GreetLanguageServer("greet-language-server", "v0.1")
+
+# -------------------------------------------------------------
+# Language feature implementations
+# -------------------------------------------------------------
+
+
+@server.feature(TEXT_DOCUMENT_COMPLETION)
+def completion(ls: LanguageServer, params: CompletionParams):
+    return [
+        CompletionItem(label="hello"),
+        CompletionItem(label="world"),
+    ]
 ```
 
-`greet_server` is referenced in several places in the file, so they all need updated.  Same with `GreetLanguageServer`.
-
-There's a couple of functions for validating the contents of a file (`_validate()`, `_validate_json()`).  We're going to update them later, so can leave the `json` references for now.
-
-That's the renaming complete.  Time, at last, to actually start implementing our support for greet.
+The code at this point is tagged [v0.1.1](https://github.com/sfinnie/helloLSP/releases/tag/v0.1.1).
 
 (language-implementation)=
 

@@ -84,18 +84,62 @@ Hello Dolly
 </section>
 <section id="starting-with-an-end-in-mind">
 <h2>Starting with an end in mind<a class="headerlink" href="#starting-with-an-end-in-mind" title="Permalink to this heading">¶</a></h2>
-<p>Before we get into how to extend our code, it’s worth being clear on what we want from the output.  We want three things:</p>
+<p>Before we get into how to extend our code, it’s worth stepping back a little and being clear on what we want from the output.  There are three things:</p>
 <ol class="arabic simple">
-<li><p>To ensure the file contents are valid, and, if not, report diagnostics as appropriate when we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> notification;</p></li>
 <li><p>To return the definition location when we receive a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition">textDocument/definition</a> request;</p></li>
-<li><p>To return the reference location(s) when we receive a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references">textDocument/references</a> request.</p></li>
+<li><p>To return the reference location(s) when we receive a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references">textDocument/references</a> request;</p></li>
+<li><p>To continue ensuring the file contents are valid, and, if not, report diagnostics as appropriate when we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> notification.</p></li>
 </ol>
-<p>We have an implementation of (1) in <a class="reference internal" href="ch2-first-server.html#regex-based-greet-parser"><span class="std std-ref">the parser we built in Chapter 2</span></a>.  We’ll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn’t defined.  We’ll come to that in a bit.</p>
-<p>Diagnostics are handled by notifications; we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> and send back a <code class="docutils literal notranslate"><span class="pre">textDocument/diagnostic</span></code> notification. Definitions and References are both commands that expect a response.  Let’s start with <code class="docutils literal notranslate"><span class="pre">definition</span></code>.  Here’s its skeleton:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@greet_server</span><span class="o">.</span><span class="n">feature</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_DEFINITION</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">definition</span><span class="p">(</span><span class="n">ls</span><span class="p">:</span> <span class="n">GreetLanguageServer</span><span class="p">,</span>  <span class="n">params</span><span class="p">:</span> <span class="n">DefinitionParams</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocationLink</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<p>We have an implementation of (3) in <a class="reference internal" href="ch2-first-server.html#regex-based-greet-parser"><span class="std std-ref">the parser we built in Chapter 2</span></a>.  We’ll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn’t defined.  We’ll come back to that in a bit.</p>
+<p>Diagnostics are handled by notifications; we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> and send back a <code class="docutils literal notranslate"><span class="pre">textDocument/diagnostic</span></code> notification. Definitions and References are both commands that expect a response.  Let’s start with <code class="docutils literal notranslate"><span class="pre">definition</span></code>.  We can get a good handle on it by looking at its type signature and an initial skeleton implementation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># server.py</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="nd">@greet_server</span><span class="o">.</span><span class="n">feature</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_DEFINITION</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">definition</span><span class="p">(</span><span class="n">ls</span><span class="p">:</span> <span class="n">GreetLanguageServer</span><span class="p">,</span>  <span class="n">params</span><span class="p">:</span> <span class="n">DefinitionParams</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocationLink</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;returns the location where the specified token is defined if found,</span>
+<span class="linenos"> 6</span><span class="sd">       None otherwise</span>
+<span class="linenos"> 7</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 8</span>    <span class="n">origin_range</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+<span class="linenos"> 9</span>                         <span class="n">end</span><span class="o">=</span><span class="n">Position</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">line</span><span class="p">,</span> 
+<span class="linenos">10</span>                                      <span class="n">character</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">character</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<span class="linenos">11</span>    
+<span class="linenos">12</span>    <span class="n">definition_range</span> <span class="o">=</span> <span class="n">Range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">Position</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">character</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span>
+<span class="linenos">13</span>                             <span class="n">end</span><span class="o">=</span><span class="n">Position</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">character</span><span class="o">=</span><span class="mi">11</span><span class="p">))</span>
+<span class="linenos">14</span>    
+<span class="linenos">15</span>    <span class="n">loc</span> <span class="o">=</span> <span class="n">LocationLink</span><span class="p">(</span><span class="n">target_uri</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">text_document</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span>
+<span class="linenos">16</span>                       <span class="n">origin_selection_range</span><span class="o">=</span><span class="n">origin_range</span><span class="p">,</span>
+<span class="linenos">17</span>                       <span class="n">target_range</span><span class="o">=</span><span class="n">definition_range</span><span class="p">,</span>
+<span class="linenos">18</span>                       <span class="n">target_selection_range</span><span class="o">=</span><span class="n">definition_range</span><span class="p">)</span>
+<span class="linenos">19</span>    <span class="k">return</span> <span class="n">loc</span>
 </pre></div>
 </div>
+<p>Note:</p>
+<ol class="arabic simple">
+<li><p>the input <code class="docutils literal notranslate"><span class="pre">params</span></code> object tells us the file &amp; position the user was at when they invoked the <code class="docutils literal notranslate"><span class="pre">goto</span> <span class="pre">definition</span></code> command:</p>
+<ul class="simple">
+<li><p>The source file name is provided in <code class="docutils literal notranslate"><span class="pre">params.text_document.uri</span></code>.</p></li>
+<li><p>The position within the file is supplied in <code class="docutils literal notranslate"><span class="pre">params.position.line</span></code> and <code class="docutils literal notranslate"><span class="pre">params.position.character</span></code>, where <code class="docutils literal notranslate"><span class="pre">character</span></code> is the column in the line.  Both are 0-indexed.</p></li>
+</ul>
+</li>
+<li><p>The response provides several things:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">target_uri</span></code> denotes the file containing the definition because, in general, a definition might exist in a different file from the reference.  <code class="docutils literal notranslate"><span class="pre">greet</span></code> doesn’t support definitions in different files, so the answer here will always be the same as the <code class="docutils literal notranslate"><span class="pre">params.text_document.uri</span></code> value passed in.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">origin_selection</span></code> denotes the range of the reference.  The input <code class="docutils literal notranslate"><span class="pre">position</span></code> tells us the <code class="docutils literal notranslate"><span class="pre">(line,</span> <span class="pre">character)</span></code> location of the user’s cursor.  It’s up to the language server to decide what word, or <em>token</em>, exists at that point.  More on this below.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target_range</span></code> indicates the position of the definition token being referenced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target_selection_range</span></code> is the enclosing context for the reference token.</p></li>
+</ul>
+</li>
+<li><p>The return type is <code class="docutils literal notranslate"><span class="pre">LocationLink</span> <span class="pre">|</span> <span class="pre">None</span></code> - which should be read as “either a <code class="docutils literal notranslate"><span class="pre">LocationLink</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code>”.  The <code class="docutils literal notranslate"><span class="pre">None</span></code> accommodates the possibility that the user has requested <code class="docutils literal notranslate"><span class="pre">goto</span> <span class="pre">definition</span></code> for something that isn’t a valid reference.</p></li>
+</ol>
+<p>A couple of examples should make that a bit clearer.  Let’s use the following example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">Name</span><span class="p">:</span> <span class="n">Daljit</span>
+<span class="linenos">2</span><span class="n">Name</span><span class="p">:</span> <span class="n">Petunia</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">Hello</span> <span class="n">Daljit</span>
+<span class="linenos">5</span><span class="n">Goodbye</span> <span class="n">Petunia</span>
+</pre></div>
+</div>
+<p>Let’s start with the <code class="docutils literal notranslate"><span class="pre">None</span></code> case.  Assume the user’s cursor was on (line 3 character 1) - between the <code class="docutils literal notranslate"><span class="pre">H</span></code> and <code class="docutils literal notranslate"><span class="pre">e</span></code> of <code class="docutils literal notranslate"><span class="pre">Hello</span></code>.  That’s not a valid reference; salutations (<code class="docutils literal notranslate"><span class="pre">Hello</span></code> / <code class="docutils literal notranslate"><span class="pre">Goodbye</span></code>) are keywords, so they don’t refer to anything.</p>
 <p>To support definitions and lookups, we’ll need some form of data structure that lets us navigate from one place to another in the file.  Each requires us to process the source file.  It’s helpful to think of the output we need each time we process the file contents:</p>
 <ol class="arabic simple">
 <li><p>A collection of zero or more <code class="docutils literal notranslate"><span class="pre">Diagnostics</span></code>, each defining and describing an error in the file, and</p></li>

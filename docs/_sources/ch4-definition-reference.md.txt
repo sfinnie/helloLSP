@@ -61,20 +61,67 @@ The grammar only specifies the language *syntax*.  It doesn't say anything about
 
 ## Starting with an end in mind
 
-Before we get into how to extend our code, it's worth being clear on what we want from the output.  We want three things:
+Before we get into how to extend our code, it's worth stepping back a little and being clear on what we want from the output.  There are three things:
 
-1. To ensure the file contents are valid, and, if not, report diagnostics as appropriate when we receive the `textDocument/didChange` notification;
 1. To return the definition location when we receive a [textDocument/definition](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition) request;
-1. To return the reference location(s) when we receive a [textDocument/references](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references) request.
+1. To return the reference location(s) when we receive a [textDocument/references](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references) request;
+1. To continue ensuring the file contents are valid, and, if not, report diagnostics as appropriate when we receive the `textDocument/didChange` notification.
 
-We have an implementation of (1) in [the parser we built in Chapter 2](#regex-based-greet-parser).  We'll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn't defined.  We'll come to that in a bit.
+We have an implementation of (3) in [the parser we built in Chapter 2](#regex-based-greet-parser).  We'll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn't defined.  We'll come back to that in a bit.
 
-Diagnostics are handled by notifications; we receive the `textDocument/didChange` and send back a `textDocument/diagnostic` notification. Definitions and References are both commands that expect a response.  Let's start with `definition`.  Here's its skeleton:
+Diagnostics are handled by notifications; we receive the `textDocument/didChange` and send back a `textDocument/diagnostic` notification. Definitions and References are both commands that expect a response.  Let's start with `definition`.  We can get a good handle on it by looking at its type signature and an initial skeleton implementation:
 
 ```{code-block} python
+:linenos:
+# server.py
+
 @greet_server.feature(TEXT_DOCUMENT_DEFINITION)
 def definition(ls: GreetLanguageServer,  params: DefinitionParams) -> LocationLink | None:
+    """returns the location where the specified token is defined if found,
+       None otherwise
+    """
+    origin_range = Range(start=params.position,
+                         end=Position(line=params.position.line, 
+                                      character=params.position.character+1))
+    
+    definition_range = Range(start=Position(line=0, character=6),
+                             end=Position(line=0, character=11))
+    
+    loc = LocationLink(target_uri=params.text_document.uri,
+                       origin_selection_range=origin_range,
+                       target_range=definition_range,
+                       target_selection_range=definition_range)
+    return loc
+
 ```
+
+Note:
+
+1. the input `params` object tells us the file & position the user was at when they invoked the `goto definition` command:
+    * The source file name is provided in `params.text_document.uri`.    
+    * The position within the file is supplied in `params.position.line` and `params.position.character`, where `character` is the column in the line.  Both are 0-indexed.
+1. The response provides several things:
+    * `target_uri` denotes the file containing the definition because, in general, a definition might exist in a different file from the reference.  `greet` doesn't support definitions in different files, so the answer here will always be the same as the `params.text_document.uri` value passed in. 
+    * `origin_selection` denotes the range of the reference.  The input `position` tells us the `(line, character)` location of the user's cursor.  It's up to the language server to decide what word, or *token*, exists at that point.  More on this below.
+    * `target_range` indicates the position of the definition token being referenced.
+    * `target_selection_range` is the enclosing context for the reference token.
+1. The return type is `LocationLink | None` - which should be read as "either a `LocationLink` or `None`".  The `None` accommodates the possibility that the user has requested `goto definition` for something that isn't a valid reference.
+
+A couple of examples should make that a bit clearer.  Let's use the following example:
+
+```{code-block}
+:linenos:
+Name: Daljit
+Name: Petunia
+
+Hello Daljit
+Goodbye Petunia
+```
+
+Let's start with the `None` case.  Assume the user's cursor was on (line 3 character 1) - between the `H` and `e` of `Hello`.  That's not a valid reference; salutations (`Hello` / `Goodbye`) are keywords, so they don't refer to anything.
+
+
+
 
 
 

@@ -91,12 +91,14 @@
 </section>
 <section id="anatomy-of-the-plugin">
 <h2>Anatomy of the Plugin<a class="headerlink" href="#anatomy-of-the-plugin" title="Permalink to this heading">¶</a></h2>
-<p>Despite all the boilerplate, there are 3 primary files that implement the plugin:</p>
+<p>Despite all the boilerplate, there are 4 primary files that implement the plugin:</p>
 <ul class="simple">
 <li><p><a class="reference download internal" download="" href="_downloads/340330e2bd4fb2b2c2fd38f79b5b5a80/extension.ts"><span class="xref download myst">client/src/extension.ts</span></a> implements the client</p></li>
 <li><p><a class="reference download internal" download="" href="_downloads/bda231c91a6a6147addc1908f62796cd/server.py"><span class="xref download myst">server/server.py</span></a> implements the server.</p></li>
+<li><p><a class="reference download internal" download="" href="_downloads/b8212410537aac35e04a1ea622ed4dc4/__main__.py"><span class="xref download myst">server/__main__py</span></a> provides options for starting the server.</p></li>
 <li><p><a class="reference download internal" download="" href="_downloads/107ae6f6a70591a8435722bf4be2e286/package.json"><span class="xref download myst">package.json</span></a> describes the capabilities that the client and server provide.</p></li>
 </ul>
+<p>Finally, there’s <a class="reference download internal" download="" href="_downloads/6246e177295844994247838c7af54180/launch.json"><span class="xref download myst">.vscode/launch.json</span></a>.  This isn’t part of the plugin proper, it tells VSCode how to start the plugin when running during development.</p>
 </section>
 <section id="tidying-up-the-skeleton">
 <h2>Tidying up the skeleton<a class="headerlink" href="#tidying-up-the-skeleton" title="Permalink to this heading">¶</a></h2>
@@ -301,25 +303,41 @@
 </section>
 <section id="server-py">
 <h3>server.py<a class="headerlink" href="#server-py" title="Permalink to this heading">¶</a></h3>
-<p>The change in the server is the main language server class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="k">class</span> <span class="nc">JsonLanguageServer</span><span class="p">(</span><span class="n">LanguageServer</span><span class="p">):</span>
-<span class="linenos">2</span>    <span class="n">CMD_PROGRESS</span> <span class="o">=</span> <span class="s1">&#39;progress&#39;</span>
-<span class="linenos">3</span>    <span class="c1">#...</span>
-<span class="linenos">4</span>
-<span class="linenos">5</span><span class="n">json_server</span> <span class="o">=</span> <span class="n">JsonLanguageServer</span><span class="p">(</span><span class="s1">&#39;pygls-json-example&#39;</span><span class="p">,</span> <span class="s1">&#39;v0.1&#39;</span><span class="p">)</span>
+<p>Here’s the full implementation for our first version of the server:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">lsprotocol.types</span> <span class="kn">import</span> <span class="n">TEXT_DOCUMENT_COMPLETION</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">lsprotocol.types</span> <span class="kn">import</span> <span class="n">CompletionItem</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">lsprotocol.types</span> <span class="kn">import</span> <span class="n">CompletionParams</span>
+<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">pygls.server</span> <span class="kn">import</span> <span class="n">LanguageServer</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="linenos"> 7</span><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;greetls.log&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">filemode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="k">class</span> <span class="nc">GreetLanguageServer</span><span class="p">(</span><span class="n">LanguageServer</span><span class="p">):</span>
+<span class="linenos">11</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;entry point for the `greet` language server&quot;&quot;&quot;</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="n">CONFIGURATION_SECTION</span> <span class="o">=</span> <span class="s1">&#39;greetServer&#39;</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="linenos">16</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">17</span>        <span class="bp">self</span><span class="o">.</span><span class="n">show_message_log</span><span class="p">(</span><span class="s2">&quot;Greet Language Server started&quot;</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span><span class="n">server</span> <span class="o">=</span> <span class="n">GreetLanguageServer</span><span class="p">(</span><span class="s2">&quot;greet-language-server&quot;</span><span class="p">,</span> <span class="s2">&quot;v0.1&quot;</span><span class="p">)</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="c1"># -------------------------------------------------------------</span>
+<span class="linenos">22</span><span class="c1"># Language feature implementations</span>
+<span class="linenos">23</span><span class="c1"># -------------------------------------------------------------</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="nd">@server</span><span class="o">.</span><span class="n">feature</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_COMPLETION</span><span class="p">)</span>
+<span class="linenos">27</span><span class="k">def</span> <span class="nf">completion</span><span class="p">(</span><span class="n">ls</span><span class="p">:</span> <span class="n">LanguageServer</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">CompletionParams</span><span class="p">):</span>
+<span class="linenos">28</span>    <span class="k">return</span> <span class="p">[</span>
+<span class="linenos">29</span>        <span class="n">CompletionItem</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;hello&quot;</span><span class="p">),</span>
+<span class="linenos">30</span>        <span class="n">CompletionItem</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;world&quot;</span><span class="p">),</span>
+<span class="linenos">31</span>    <span class="p">]</span>
 </pre></div>
 </div>
-<p>Unsurprisingly, that becomes:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="linenos">1</span><span class="k">class</span> <span class="nc">GreetLanguageServer</span><span class="p">(</span><span class="n">LanguageServer</span><span class="p">):</span>
-</span><span class="linenos">2</span>    <span class="n">CMD_PROGRESS</span> <span class="o">=</span> <span class="s1">&#39;progress&#39;</span>
-<span class="linenos">3</span>    <span class="c1">#...</span>
-<span class="linenos">4</span>
-<span class="hll"><span class="linenos">5</span><span class="n">greet_server</span> <span class="o">=</span> <span class="n">GreetLanguageServer</span><span class="p">(</span><span class="s1">&#39;pygls-greet-example&#39;</span><span class="p">,</span> <span class="s1">&#39;v0.1&#39;</span><span class="p">)</span>
-</span></pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">greet_server</span></code> is referenced in several places in the file, so they all need updated.  Same with <code class="docutils literal notranslate"><span class="pre">GreetLanguageServer</span></code>.</p>
-<p>There’s a couple of functions for validating the contents of a file (<code class="docutils literal notranslate"><span class="pre">_validate()</span></code>, <code class="docutils literal notranslate"><span class="pre">_validate_json()</span></code>).  We’re going to update them later, so can leave the <code class="docutils literal notranslate"><span class="pre">json</span></code> references for now.</p>
-<p>That’s the renaming complete.  Time, at last, to actually start implementing our support for greet.</p>
+<p>The code at this point is tagged <a class="reference external" href="https://github.com/sfinnie/helloLSP/releases/tag/v0.1.1">v0.1.1</a>.</p>
 </section>
 </section>
 <section id="implementing-greet-language-support">

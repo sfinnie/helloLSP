@@ -53,5 +53,5 @@ def completion(ls: LanguageServer, params: CompletionParams):
 # Start the server
 # -------------------------------------------------------------
 
-if __name__ == "__main__":
-    server.start_io()
+# if __name__ == "__main__":
+#     server.start_io()

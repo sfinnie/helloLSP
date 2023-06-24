@@ -16,15 +16,15 @@ import pytest
 import asyncio
 
 
-@pytest.fixture
-def event_loop():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+#@pytest.fixture
+#def event_loop():
+#    loop = asyncio.new_event_loop()
+#    yield loop
+#    loop.close()
 
 
 @pytest_lsp.fixture(
-    config=ClientServerConfig(server_command=[sys.executable, "-m", "server.server"]),
+    config=ClientServerConfig(server_command=[sys.executable, "-m", "lsp.server"]),
 )
 async def client(lsp_client: LanguageClient):
     # Setup

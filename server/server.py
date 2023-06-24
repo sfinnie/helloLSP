@@ -261,3 +261,8 @@ async def unregister_completions(ls: GreetLanguageServer, *args):
     else:
         ls.show_message('Error happened during completions unregistration.',
                         MessageType.Error)
+
+
+if __name__ == "__main__":
+    print("starting via main function in server.py")
+    greet_server.start_io()

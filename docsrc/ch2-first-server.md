@@ -75,12 +75,14 @@ With that done, the basics are all in place.  Close the development instance for
 
 ## Anatomy of the Plugin
 
-Despite all the boilerplate, there are 3 primary files that implement the plugin:
+Despite all the boilerplate, there are 4 primary files that implement the plugin:
 
 * [client/src/extension.ts](../client/src/extension.ts) implements the client
 * [server/server.py](../server/server.py) implements the server.
+* [server/__main__py](../server/__main__.py) provides options for starting the server.
 * [package.json](../package.json) describes the capabilities that the client and server provide.
 
+Finally, there's [.vscode/launch.json](../.vscode/launch.json).  This isn't part of the plugin proper, it tells VSCode how to start the plugin when running during development.
 
 ## Tidying up the skeleton
 

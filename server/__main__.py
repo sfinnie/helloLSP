@@ -17,7 +17,7 @@
 import argparse
 import logging
 
-from .server import greet_server
+from .server import server
 
 logging.basicConfig(filename="pygls.log", level=logging.DEBUG, filemode="w")
 
@@ -49,11 +49,11 @@ def main():
     args = parser.parse_args()
 
     if args.tcp:
-        greet_server.start_tcp(args.host, args.port)
+        server.start_tcp(args.host, args.port)
     elif args.ws:
-        greet_server.start_ws(args.host, args.port)
+        server.start_ws(args.host, args.port)
     else:
-        greet_server.start_io()
+        server.start_io()
 
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ from lsprotocol.types import VersionedTextDocumentIdentifier
 from lsprotocol.types import TextDocumentContentChangeEvent_Type1
 from lsprotocol.types import Range
 from lsprotocol.types import Position
+from lsprotocol.types import DefinitionParams
 
 
 import pytest_lsp
@@ -45,6 +46,28 @@ async def client(lsp_client: LanguageClient):
 # =============================================================================
 # Integration tests i.e. using test language client
 # =============================================================================
+
+# Handy hint - to temporarily disable test
+# @pytest.mark.skip(reason="awaiting resolution of pytest-lsp issues")
+
+# -------------------------------------------------------------------
+# Definitions and References
+# -------------------------------------------------------------------
+
+# @pytest.mark.skip(reason="not implemented yet")
+# async def test_invalid_reference_returns_None(client: LanguageClient):
+    
+#     #arrange
+#     params: DefinitionParams
+
+#     params.text_document = TextDocumentIdentifier(uri = "./valid.greet")
+#     params.position = Position(line=3, character=1)
+
+#     #act
+#     rsp = definition(client, DefinitionParams)
+
+#     #assert
+#     assert rsp is None 
 
 # -------------------------------------------------------------------
 # Diagnostics (AKA errors & warnings)

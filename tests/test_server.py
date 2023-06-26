@@ -12,10 +12,8 @@ from lsprotocol.types import DidChangeTextDocumentParams
 from lsprotocol.types import TextDocumentItem
 from lsprotocol.types import VersionedTextDocumentIdentifier
 from lsprotocol.types import TextDocumentContentChangeEvent_Type1
-from lsprotocol.types import TextDocumentContentChangeEvent_Type2
 from lsprotocol.types import Range
 from lsprotocol.types import Position
-
 
 
 import pytest_lsp

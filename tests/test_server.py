@@ -49,7 +49,7 @@ async def test_parse_sucessful_on_file_open(client: LanguageClient):
     """Ensure that the server implements diagnostics correctly when a valid file is opened."""
 
     test_uri = "file:///path/to/file.txt"
-    
+
     params = DidOpenTextDocumentParams(
         text_document=TextDocumentItem(
             uri="file:///path/to/file.txt",
@@ -67,6 +67,29 @@ async def test_parse_sucessful_on_file_open(client: LanguageClient):
     assert test_uri in client.diagnostics
     assert len(client.diagnostics[test_uri]) == 0
 
+async def test_parse_fail_on_file_open(client):
+    """Ensure that the server implements diagnostics correctly when an invalid file is opened."""
+
+    test_uri = "file:///path/to/file.txt"
+
+    params = DidOpenTextDocumentParams(
+        text_document=TextDocumentItem(
+            uri="file:///path/to/file.txt",
+            language_id="greet",
+            version=1,
+            text="Hello Petunia123"
+        )
+    )
+
+    client.text_document_did_open(params=params)
+
+
+    # Wait for the server to publish its diagnostics
+    await client.wait_for_notification(TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+
+    assert test_uri in client.diagnostics
+    assert len(client.diagnostics[test_uri]) == 1
+    assert client.diagnostics[test_uri][0].message == "Greeting must be either 'Hello <name>' or 'Goodbye <name>'"
 
 
 # -------------------------------------------------------------------

@@ -92,6 +92,7 @@ def _parse_greet(source: str) -> List[Diagnostic]:
  
     return diagnostics
 
+
 @server.feature(TEXT_DOCUMENT_DID_OPEN)
 async def did_open(ls, params: DidOpenTextDocumentParams):
     """Text document did open notification."""
@@ -100,8 +101,9 @@ async def did_open(ls, params: DidOpenTextDocumentParams):
 
 
 @server.feature(TEXT_DOCUMENT_DID_CHANGE)
-def did_change(ls, params: DidChangeTextDocumentParams):
+async def did_change(ls, params: DidChangeTextDocumentParams):
     """Text document did change notification."""
+    ls.show_message_log("textDocument/didChange notified")
     _parse(ls, params)
 
 

@@ -5,12 +5,10 @@ from server import server
 from lsprotocol.types import Diagnostic, Range, Position
 
 error_examples = [
-    "nam: Bobby",               # invalid token 0.  Can't say anything more about it without fuzzy matching.
-    "name Frederic",            # invalid token 0.  As above.
-    "name: Bobby McFadyen",     # invalid name declaration statement
-    "name: Bobby24",            # invalid name declaration statement
-    
-    ""
+    ("nam: Bobby"),               # invalid token 0.  Can't say anything more about it without fuzzy matching.
+    ("name Frederic"),            # invalid token 0.  As above.
+    ("name: Bobby McFadyen"),     # invalid name declaration statement
+    ("name: Bobby24")             # invalid name declaration statement
 ]
 
 # def test_parse_valid_name_decl_succeeds():
@@ -37,7 +35,8 @@ def test_valid_greeting_accepted(greeting):
     assert result == []
 
 
-@pytest.mark.parametrize("greeting", [("Wotcha Thelma"), ("Goodbye L0u1se"), ("Goodbye Louise again")])
+# @pytest.mark.parametrize("greeting", [("Wotcha Thelma"), ("Goodbye L0u1se"), ("Goodbye Louise again")])
+@pytest.mark.parametrize("greeting", error_examples)
 def test_invalid_greeting_rejected(greeting):
 
     result = server._parse_greet(greeting)

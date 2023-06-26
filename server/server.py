@@ -17,9 +17,12 @@
 # limitations under the License.                                           #
 ############################################################################
 
-from lsprotocol.types import TEXT_DOCUMENT_COMPLETION
-from lsprotocol.types import CompletionItem
-from lsprotocol.types import CompletionParams
+# textDocument/Completion
+from lsprotocol.types import (TEXT_DOCUMENT_COMPLETION, 
+                              CompletionParams, 
+                              CompletionItem)
+
+
 from pygls.server import LanguageServer
 
 import logging

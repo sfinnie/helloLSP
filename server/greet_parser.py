@@ -4,7 +4,7 @@ from lark import Lark, Transformer, Tree, UnexpectedInput, UnexpectedToken
 from dataclasses import dataclass
 
 greeting_grammar = """
-    start: declaration (_NEWLINE+ declaration)* _NEWLINE*
+    start: _NEWLINE* declaration (_NEWLINE+ declaration)* _NEWLINE*
     
     ?declaration: name_definition
                 | greeting

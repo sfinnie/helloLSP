@@ -57,7 +57,7 @@ The documentation is created with [sphynx](https://www.sphinx-doc.org/).  Browsi
 
 1. `cd docsrc`
 2. `make html`
-3. Open [docs/_build/html/index.html](docs/_build/html/index.html) in your browser.
+3. Open [docs/index.html](docs/_build/html/index.html) in your browser.
 
 ### Live reloading 
 

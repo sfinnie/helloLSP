@@ -7,10 +7,10 @@ A practical guide to the [Language Server Protocol](https://microsoft.github.io/
 :caption: "Contents:"
 :maxdepth: 3
 
-Introduction <intro>
-First Language Server <first_server>
-Testing the Server <testing>
-Definitions and References <definition-reference>
+Introduction <ch1-intro>
+First Language Server <ch2-first-server>
+Testing the Server <ch3-testing>
+Definitions and References <ch4-definition-reference>
 ```
 
 # Indices and tables

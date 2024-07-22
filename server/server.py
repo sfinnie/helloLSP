@@ -22,23 +22,39 @@ import re
 import time
 import uuid
 from json import JSONDecodeError
-from typing import Optional
+from typing import List, Optional
 
+# Command and notification names
 from lsprotocol.types import (TEXT_DOCUMENT_COMPLETION, TEXT_DOCUMENT_DID_CHANGE,
                                TEXT_DOCUMENT_DID_CLOSE, TEXT_DOCUMENT_DID_OPEN,
+                               TEXT_DOCUMENT_REFERENCES,
                                TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL)
+
+# Datatypes passed in commands/responses/notifications
 from lsprotocol.types import (CompletionItem, CompletionList, CompletionOptions,
                               CompletionParams, ConfigurationItem,
-                              Diagnostic,
+                              # document didChange/didOpen notifications
+                              DidOpenTextDocumentParams, 
                               DidChangeTextDocumentParams,
+                              
+                              # Returning diagnostics when issues detected with source file
+                              Diagnostic,
+                              Range, 
                               DidCloseTextDocumentParams,
-                              DidOpenTextDocumentParams, MessageType, Position,
-                              Range, Registration, RegistrationParams,
+
+                              MessageType, Position,
+                              Registration, RegistrationParams,
                               SemanticTokens, SemanticTokensLegend, SemanticTokensParams,
                               Unregistration, UnregistrationParams,
                               WorkDoneProgressBegin, WorkDoneProgressEnd,
                               WorkDoneProgressReport,
                               WorkspaceConfigurationParams)
+
+# textDocument/definition: return the location where a symbol is defined
+from lsprotocol.types import ( TEXT_DOCUMENT_DEFINITION, # command alias
+                               DefinitionParams,         # command params
+                               LocationLink)             # response
+
 from pygls.server import LanguageServer
 
 COUNT_DOWN_START_IN_SECONDS = 10
@@ -70,9 +86,9 @@ def _parse(ls: GreetLanguageServer, params: DidOpenTextDocumentParams | DidChang
     ls.publish_diagnostics(text_doc.uri, diagnostics)
 
 
-def _parse_greet(source: str):
+def _parse_greet(source: str) -> List[Diagnostic]:
     """Parses a greeting file.  Generates diagnostic messages for any problems found"""
-    diagnostics = []
+    diagnostics: List[Diagnostic] = []
 
     grammar = re.compile(r'^(Hello|Goodbye)\s+([a-zA-Z]+)\s*$')
 
@@ -97,27 +113,12 @@ def _parse_greet(source: str):
  
     return diagnostics
 
-@greet_server.feature(TEXT_DOCUMENT_COMPLETION)
-def completion(ls: LanguageServer, params: CompletionParams):
-    return [
-        CompletionItem(label="hello"),
-        CompletionItem(label="world"),
-    ]
 
-
-# @greet_server.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=[',']))
-# def completions(params: Optional[CompletionParams] = None) -> CompletionList:
-#     """Returns completion items."""
-#     return CompletionList(
-#         is_incomplete=False,
-#         items=[
-#             CompletionItem(label='"'),
-#             CompletionItem(label='['),
-#             CompletionItem(label=']'),
-#             CompletionItem(label='{'),
-#             CompletionItem(label='}'),
-#         ]
-#     )
+@greet_server.feature(TEXT_DOCUMENT_DID_OPEN)
+async def did_open(ls, params: DidOpenTextDocumentParams):
+    """Text document did open notification."""
+    ls.show_message('Text Document Did Open')
+    _parse(ls, params)
 
 
 @greet_server.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -132,11 +133,41 @@ def did_close(server: GreetLanguageServer, params: DidCloseTextDocumentParams):
     server.show_message('Text Document Did Close')
 
 
-@greet_server.feature(TEXT_DOCUMENT_DID_OPEN)
-async def did_open(ls, params: DidOpenTextDocumentParams):
-    """Text document did open notification."""
-    ls.show_message('Text Document Did Open')
-    _parse(ls, params)
+@greet_server.feature(TEXT_DOCUMENT_REFERENCES)
+def references(ls: GreetLanguageServer):
+    """returns a list of 0 or more locations that reference the specified token"""
+    pass
+
+
+@greet_server.feature(TEXT_DOCUMENT_DEFINITION)
+def definition(ls: GreetLanguageServer,  params: DefinitionParams) -> LocationLink | None:
+    """returns the location where the specified token is defined if found,
+       None otherwise
+    """
+    origin_range = Range(start=params.position,
+                         end=Position(line=params.position.line, 
+                                      character=params.position.character+1))
+    
+    definition_range = Range(start=Position(line=0, character=6),
+                             end=Position(line=0, character=11))
+    
+    loc = LocationLink(target_uri=params.text_document.uri,
+                       origin_selection_range=origin_range,
+                       target_range=definition_range,
+                       target_selection_range=definition_range)
+    return loc
+
+
+# ---------------------------------------------------------------------------
+# Features from original skeleton
+# ---------------------------------------------------------------------------
+
+@greet_server.feature(TEXT_DOCUMENT_COMPLETION)
+def completion(ls: LanguageServer, params: CompletionParams):
+    return [
+        CompletionItem(label="hello"),
+        CompletionItem(label="world"),
+    ]
 
 
 @greet_server.feature(
@@ -230,3 +261,8 @@ async def unregister_completions(ls: GreetLanguageServer, *args):
     else:
         ls.show_message('Error happened during completions unregistration.',
                         MessageType.Error)
+
+
+if __name__ == "__main__":
+    print("starting via main function in server.py")
+    greet_server.start_io()

@@ -10,8 +10,8 @@ These aren't relevant to `greet` in its current form: we don't currently define 
 (extended-greet-example)=
 
 ```text
-name: Bob
-name: Dolly
+Name: Bob
+Name: Dolly
 
 Goodbye Bob
 Hello Dolly
@@ -22,10 +22,10 @@ We've added `name` definitions, such that names have to be defined before they c
 * If the user right-clicks on "Bob" on the first line and selects "Find References", then "Bob" in "Goodbye Bob" is highlighted
 * If the user right-clicks on "Bob" in "Goodbye Bob" and selects "Go To Definition", then they end up back at line 1.
 
-The same applies for Dolly obviously.  That seems pretty simple.  But getting there is going to mean a fair bit of a detour into how our language server parses and stores the input file.
+The same applies for Dolly obviously.  That seems pretty simple.  But getting there is going to mean a fair bit of a detour into how our language server parses and analyses the input file.
 
 ```{note}
-The LSP differentiates between *declaration* and *definition*.  A *declaration* is made when a symbol is introduced but not bound, for example `foo: str` in Python.  A *definition* both introduces a symbol and binds it to a value, e.g. `foo: str = "bar"`.  Greet's `name:` statements bind values for names, so definitions are appropriate here.
+The LSP differentiates between *declaration* and *definition*.  A *declaration* is made when a symbol is introduced but not bound to a value, for example `foo: str` in Python.  A *definition* both introduces a symbol and binds a value, e.g. `foo: str = "bar"`.  Greet's `name:` statements bind values for names, so definitions are appropriate here.
 ```
 
 ## Extending the Language Grammar
@@ -38,7 +38,7 @@ First off, let's extend the [greet BNF Grammar](#greet-grammar) we originally cr
 :linenos:
 :emphasize-lines: 1, 2
     statement   ::= definition | greeting
-    definition  ::= 'name:' name
+    definition  ::= 'Name:' name
     greeting    ::= salutation name
     salutation  ::= 'Hello' | 'Goodbye'
     name        ::= [a-zA-Z]+
@@ -47,17 +47,45 @@ First off, let's extend the [greet BNF Grammar](#greet-grammar) we originally cr
 The first two lines are additions to the original grammar (which otherwise remains the same).  They say:
 
 * a `statement` in the language is either a `definition` or a `greeting` (line 1)
-* a `definition` is the literal `name:` followed by a `name` (line 2)
+* a `definition` is the literal `Name:` followed by a `name` (line 2)
 
 It's worth noting a couple of things about the use of `name`:
 
 1. both `definition` and `greeting` refer to the same term on line 5 of the grammar.  That makes sense: we don't want different rules for a valid name when defining it vs using it.
 1. Notwithstanding that, the grammar says nothing about a greeting referencing a name that's been defined.  Based on the grammar alone, the following would be valid:
 
-        name: Bob
+        Name: Bob
         Hello Dolly
 
 The grammar only specifies the language *syntax*.  It doesn't say anything about its *semantics* - its *meaning*.  We haven't had to deal with semantics up to this point.  As humans reading the language, we understand it would break our new rules to greet someone whose name hasn't been defined.  We need to fnd a way to encode that.
+
+## Starting with an end in mind
+
+Before we get into how to extend our code, it's worth being clear on what we want from the output.  We want three things:
+
+1. To ensure the file contents are valid, and, if not, report diagnostics as appropriate when we receive the `textDocument/didChange` notification;
+1. To return the definition location when we receive a [textDocument/definition](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition) request;
+1. To return the reference location(s) when we receive a [textDocument/references](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references) request.
+
+We have an implementation of (1) in [the parser we built in Chapter 2](#regex-based-greet-parser).  We'll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn't defined.  We'll come to that in a bit.
+
+Diagnostics are handled by notifications; we receive the `textDocument/didChange` and send back a `textDocument/diagnostic` notification. Definitions and References are both commands that expect a response.  Let's start with `definition`.  Here's its skeleton:
+
+```{code-block} python
+@greet_server.feature(TEXT_DOCUMENT_DEFINITION)
+def definition(ls: GreetLanguageServer,  params: DefinitionParams) -> LocationLink | None:
+```
+
+
+
+
+To support definitions and lookups, we'll need some form of data structure that lets us navigate from one place to another in the file.  Each requires us to process the source file.  It's helpful to think of the output we need each time we process the file contents:
+
+1. A collection of zero or more `Diagnostics`, each defining and describing an error in the file, and
+1. A way to map name references to their definitions, and vice-versa.
+
+The shape of Diagnostics are defined for us by the LSP and implemented by `lsprotocol.types.Diagnostic`.   We've seen it before in the [initial parser](#regex-based-greet-parser).  
+
 
 ## Bye-bye regular expressions, hello parser-generator
 
@@ -66,8 +94,19 @@ We [implemented the original grammar](language-regex) using a regular expression
 1. It gets complicated.  Regexes are notorious for being "write only", meaning that trying to read them is hard.  Our original grammar is already pushing the boundaries; adding our new grammar rules would take us firmly into inscrutable territory.
 1. We need the locations of tokens in the file.  For example, we need to know that "Bob" occupies columns 7, 8 and 9 on line 1 in the [example](#extended-greet-example) (assuming we start counting at column 1, not 0).  Regexes don't give us an easy way to do that.
 
-We could hand-write a parser.  We could instead use a [parser-generator](https://en.wikipedia.org/wiki/Comparison_of_parser_generators) that takes a definition of our grammar and creates a parser for us.  There are good reasons to use either approach; we'll use the latter.  There are [many parser-generators available](https://en.wikipedia.org/wiki/Comparison_of_parser_generators).  I've chosen to use [tree-sitter](https://tree-sitter.github.io/) for a number of reasons:
+We could hand-write a parser.  We could instead use a [parser-generator](https://en.wikipedia.org/wiki/Comparison_of_parser_generators) that takes a definition of our grammar and creates a parser for us.  There are good reasons to use either approach; we'll use the latter.  There are [many parser-generators available](https://en.wikipedia.org/wiki/Comparison_of_parser_generators).  I've chosen to use [Lark](https://github.com/lark-parser/lark) for a number of reasons:
 
-1. It's fast. It was originally created for the [Atom](https://github.com/atom) editor, specifically for parsing and syntax highlighting programming languages.
-1. It's easy to use (after a bit of setup)
-1. It has python bindings, meaning it's easy to interact with from Python
+1. It installs as a Python library, so setup is easy
+1. It's easy to use
+1. A Lark grammar specification looks quite similar to our BNF definition.
+1. It's [well documented](https://lark-parser.readthedocs.io/en/latest/).
+
+# Installing Lark
+
+Installation is easy:
+
+```bash
+python3 -m pip install lark
+```
+
+

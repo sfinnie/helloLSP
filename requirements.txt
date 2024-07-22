@@ -3,3 +3,5 @@ pytest
 pytest-lsp 
 tree-sitter 
 PyYAML
+lark
+

@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Adventures with the Language Server Protocol &#8212; HelloLSP  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -14,7 +13,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="intro.html" />
+    <link rel="next" title="Introduction" href="ch1-intro.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -37,55 +36,57 @@
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#lsp-overview">LSP Overview</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="intro.html#client-server-interaction">Client-Server Interaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch1-intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ch1-intro.html#lsp-overview">LSP Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ch1-intro.html#client-server-interaction">Client-Server Interaction</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="intro.html#the-greet-language">The Greet Language</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch1-intro.html#the-greet-language">The Greet Language</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="first_server.html">First Language Server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="first_server.html#implementation-skeleton">Implementation Skeleton</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="first_server.html#pre-requisites">Pre-Requisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch2-first-server.html">First Language Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ch2-first-server.html#implementation-skeleton">Implementation Skeleton</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ch2-first-server.html#pre-requisites">Pre-Requisites</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="first_server.html#anatomy-of-the-plugin">Anatomy of the Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="first_server.html#tidying-up-the-skeleton">Tidying up the skeleton</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="first_server.html#tiny-baby-steps-setting-the-language">Tiny baby steps - setting the language</a></li>
-<li class="toctree-l3"><a class="reference internal" href="first_server.html#cleaning-up">Cleaning up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch2-first-server.html#anatomy-of-the-plugin">Anatomy of the Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch2-first-server.html#tidying-up-the-skeleton">Tidying up the skeleton</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ch2-first-server.html#tiny-baby-steps-setting-the-language">Tiny baby steps - setting the language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ch2-first-server.html#cleaning-up">Cleaning up</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="first_server.html#naming-enough-already-json">Naming: enough, already, Json</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="first_server.html#package-json">Package.json</a></li>
-<li class="toctree-l3"><a class="reference internal" href="first_server.html#extension-ts">extension.ts</a></li>
-<li class="toctree-l3"><a class="reference internal" href="first_server.html#server-py">server.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch2-first-server.html#naming-enough-already-json">Naming: enough, already, Json</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ch2-first-server.html#package-json">Package.json</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ch2-first-server.html#extension-ts">extension.ts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ch2-first-server.html#server-py">server.py</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="first_server.html#implementing-greet-language-support">Implementing Greet Language Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch2-first-server.html#implementing-greet-language-support">Implementing Greet Language Support</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing the Server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="testing.html#testing-the-parser">Testing the Parser</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="testing.html#positive-tests">Positive Tests</a></li>
-<li class="toctree-l3"><a class="reference internal" href="testing.html#negative-tests">Negative Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch3-testing.html">Testing the Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ch3-testing.html#testing-the-parser">Testing the Parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ch3-testing.html#positive-tests">Positive Tests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ch3-testing.html#negative-tests">Negative Tests</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="testing.html#testing-the-server">Testing the Server</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="testing.html#setup">Setup</a></li>
-<li class="toctree-l3"><a class="reference internal" href="testing.html#parsing-a-valid-file-on-opening">Parsing a valid file on opening</a></li>
-<li class="toctree-l3"><a class="reference internal" href="testing.html#parsing-an-invalid-file-on-opening">Parsing an invalid file on opening</a></li>
-<li class="toctree-l3"><a class="reference internal" href="testing.html#ensuring-file-is-parsed-when-changed">Ensuring file is parsed when changed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch3-testing.html#testing-the-server">Testing the Server</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ch3-testing.html#setup">Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ch3-testing.html#parsing-a-valid-file-on-opening">Parsing a valid file on opening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ch3-testing.html#parsing-an-invalid-file-on-opening">Parsing an invalid file on opening</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ch3-testing.html#ensuring-file-is-parsed-when-changed">Ensuring file is parsed when changed</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="testing.html#wrapping-up">Wrapping up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch3-testing.html#wrapping-up">Wrapping up</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="definition-reference.html">Definitions and References</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="definition-reference.html#extending-the-language-grammar">Extending the Language Grammar</a></li>
-<li class="toctree-l2"><a class="reference internal" href="definition-reference.html#bye-bye-regular-expressions-hello-parser-generator">Bye-bye regular expressions, hello parser-generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch4-definition-reference.html">Extending the Server: Definitions and References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ch4-definition-reference.html#extending-the-language-grammar">Extending the Language Grammar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch4-definition-reference.html#starting-with-an-end-in-mind">Starting with an end in mind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ch4-definition-reference.html#bye-bye-regular-expressions-hello-parser-generator">Bye-bye regular expressions, hello parser-generator</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="ch4-definition-reference.html#installing-lark">Installing Lark</a></li>
 </ul>
 </div>
 </section>
@@ -117,17 +118,18 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="first_server.html">First Language Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing the Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="definition-reference.html">Definitions and References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch1-intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch2-first-server.html">First Language Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch3-testing.html">Testing the Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch4-definition-reference.html">Extending the Server: Definitions and References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch4-definition-reference.html#installing-lark">Installing Lark</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="intro.html" title="next chapter">Introduction</a></li>
+      <li>Next: <a href="ch1-intro.html" title="next chapter">Introduction</a></li>
   </ul></li>
 </ul>
 </div>
@@ -157,7 +159,7 @@
       &copy;2023, sfinnie.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.0.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |

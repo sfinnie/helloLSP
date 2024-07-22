@@ -14,7 +14,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Testing" href="testing.html" />
-    <link rel="prev" title="Introduction" href="intro.html" />
+    <link rel="prev" title="Introduction" href="ch1-intro.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -330,7 +330,7 @@
 <li><p><a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references">Find References</a></p></li>
 <li><p><a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_completion">Completion Items</a></p></li>
 </ul>
-<p>We’ll start with checking that a <code class="docutils literal notranslate"><span class="pre">greet</span></code> file is consistent with the <a class="reference internal" href="intro.html#greet-grammar"><span class="std std-ref">greet grammar</span></a>.  We know from <a class="reference internal" href="intro.html#protocol-overview"><span class="std std-ref">earlier</span></a> that notifications can be sent from the client to the server and vice-versa.  One of those notifications is <code class="docutils literal notranslate"><span class="pre">textDocument/didOpen</span></code> which is sent when a document, of the type supported by the plugin, is opened. We saw that in the development instance: it displayed the message <code class="docutils literal notranslate"><span class="pre">Text</span> <span class="pre">Document</span> <span class="pre">Did</span> <span class="pre">Open</span></code> when we opened a file with the <code class="docutils literal notranslate"><span class="pre">.greet</span></code> extension.  Here’s the source of that in <code class="docutils literal notranslate"><span class="pre">server.py</span></code>:</p>
+<p>We’ll start with checking that a <code class="docutils literal notranslate"><span class="pre">greet</span></code> file is consistent with the <a class="reference internal" href="ch1-intro.html#greet-grammar"><span class="std std-ref">greet grammar</span></a>.  We know from <a class="reference internal" href="ch1-intro.html#protocol-overview"><span class="std std-ref">earlier</span></a> that notifications can be sent from the client to the server and vice-versa.  One of those notifications is <code class="docutils literal notranslate"><span class="pre">textDocument/didOpen</span></code> which is sent when a document, of the type supported by the plugin, is opened. We saw that in the development instance: it displayed the message <code class="docutils literal notranslate"><span class="pre">Text</span> <span class="pre">Document</span> <span class="pre">Did</span> <span class="pre">Open</span></code> when we opened a file with the <code class="docutils literal notranslate"><span class="pre">.greet</span></code> extension.  Here’s the source of that in <code class="docutils literal notranslate"><span class="pre">server.py</span></code>:</p>
 <div class="highlight-python notranslate" id="did-open"><div class="highlight"><pre><span></span><span class="hll"><span class="linenos">1</span><span class="nd">@greet_server</span><span class="o">.</span><span class="n">feature</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_DID_OPEN</span><span class="p">)</span>
 </span><span class="linenos">2</span><span class="k">async</span> <span class="k">def</span> <span class="nf">did_open</span><span class="p">(</span><span class="n">ls</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">DidOpenTextDocumentParams</span><span class="p">):</span>
 <span class="linenos">3</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Text document did open notification.&quot;&quot;&quot;</span>
@@ -437,7 +437,7 @@
 <li><p>The <code class="docutils literal notranslate"><span class="pre">^</span></code> means the grammar must match the start of the line: there can’t be any characters (including white space) before the first pattern</p></li>
 <li><p>The first pattern matches the salutation: <code class="docutils literal notranslate"><span class="pre">(Hello|Goodbye)</span></code> means match the string ‘Hello’ or the string ‘Goodbye’.  The brackets mean the match will capture which string matched: we’re not using that here but will later.</p></li>
 <li><p>The second pattern - <code class="docutils literal notranslate"><span class="pre">\s+</span></code> - means match one or more white space characters after the salutation and before what follows.  <code class="docutils literal notranslate"><span class="pre">\s</span></code> means match a single whitespace character (space, tab); <code class="docutils literal notranslate"><span class="pre">+</span></code> means match one or more.</p></li>
-<li><p>The third pattern matches the name: <code class="docutils literal notranslate"><span class="pre">([a-zA-Z]+)</span></code>.  This is exactly the same as the formal grammar defined <a class="reference internal" href="intro.html#greet-grammar"><span class="std std-ref">previously</span></a>.  Again, the surrounding brackets mean the value should be captured if match is successful</p></li>
+<li><p>The third pattern matches the name: <code class="docutils literal notranslate"><span class="pre">([a-zA-Z]+)</span></code>.  This is exactly the same as the formal grammar defined <a class="reference internal" href="ch1-intro.html#greet-grammar"><span class="std std-ref">previously</span></a>.  Again, the surrounding brackets mean the value should be captured if match is successful</p></li>
 <li><p>The final pattern - <code class="docutils literal notranslate"><span class="pre">\s*$</span></code> - means match zero or more whitespace characters before the end of the line.  <code class="docutils literal notranslate"><span class="pre">\s</span></code> means match a single whitespace character as before; <code class="docutils literal notranslate"><span class="pre">*</span></code> means match zero or more; and <code class="docutils literal notranslate"><span class="pre">$</span></code> means match the end of the string.</p></li>
 </ul>
 <p>We iterate through each line in the file in turn, checking if it matches the grammar.  If it doesn’t, we create a <code class="docutils literal notranslate"><span class="pre">Diagnostic</span></code> instance that specifies the location of the problem and the error message to show.  In this first incarnation, we’re not breaking down where the error lies.  That’s viable with a grammar as simple as <code class="docutils literal notranslate"><span class="pre">greet</span></code> in its current form.  Anything more complex and we’d want to be a bit more specific with error messages, but it’s plenty good for now.  Spin up a development instance (<code class="docutils literal notranslate"><span class="pre">ctrl-shift-D</span></code> and <code class="docutils literal notranslate"><span class="pre">f5</span></code>), open the sample .greet file, and have a play.  The editor should show a red squiggly for any lines that don’t match the grammar, and show the diagnostic message if you hover over an error:</p>
@@ -490,7 +490,7 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch1-intro.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">First Language Server</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#implementation-skeleton">Implementation Skeleton</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pre-requisites">Pre-Requisites</a></li>
@@ -519,7 +519,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="intro.html" title="previous chapter">Introduction</a></li>
+      <li>Previous: <a href="ch1-intro.html" title="previous chapter">Introduction</a></li>
       <li>Next: <a href="testing.html" title="next chapter">Testing</a></li>
   </ul></li>
 </ul>
@@ -554,7 +554,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
-      <a href="_sources/first_server.md.txt"
+      <a href="_sources/ch2-first_server.md.txt"
           rel="nofollow">Page source</a>
     </div>
 

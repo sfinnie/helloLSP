@@ -13,7 +13,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="A First Server" href="first_server.html" />
+    <link rel="next" title="A First Server" href="ch2-first-server.html" />
     <link rel="prev" title="Adventures with the Language Server Protocol" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -46,7 +46,7 @@
 <p>That’s good enough for here.  There are overviews of the LSP on <a class="reference external" href="https://microsoft.github.io/language-server-protocol/">Microsoft’s official site</a>, the <a class="reference external" href="https://langserver.org/">community site</a> and others too.  Those are worth a read for more background.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you know the basics of how LSP works, you can <a class="reference internal" href="#greet-language"><span class="xref myst">skip ahead to the language we’ll implement support for</span></a>.</p>
+<p>If you know the basics of how LSP works, you can <a class="reference internal" href="#greet-language">skip ahead to the language we’ll implement support for</a>.</p>
 </div>
 <p>As per the introduction, the solution comprises 2 parts:</p>
 <ul class="simple">
@@ -128,7 +128,7 @@
 </section>
 </section>
 <section id="the-greet-language">
-<h2>The Greet Language<a class="headerlink" href="#the-greet-language" title="Permalink to this heading">¶</a></h2>
+<span id="greet-language"></span><h2>The Greet Language<a class="headerlink" href="#the-greet-language" title="Permalink to this heading">¶</a></h2>
 <p>If we’re to implement a language <em>server</em>, we need a <em>language</em>.  Real language servers deal with programming languages.  Implementing programming languages is an entire body of theory and practice in itself.  We don’t want to get diverted into that right now, so we’ll start with something really simple.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -152,7 +152,7 @@ Goodbye Nellie
 <li><p>A <code class="docutils literal notranslate"><span class="pre">salutation</span></code> is the word <code class="docutils literal notranslate"><span class="pre">Hello</span></code> or the word <code class="docutils literal notranslate"><span class="pre">Goodbye</span></code></p></li>
 <li><p>A <code class="docutils literal notranslate"><span class="pre">name</span></code> is one or more letters, either lower or upper case.  Note there can’t be any spaces between the letters: <code class="docutils literal notranslate"><span class="pre">Nellie</span></code> is fine but <code class="docutils literal notranslate"><span class="pre">Nellie</span> <span class="pre">bob</span></code> isn’t<a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>.</p></li>
 </ul>
-<p>We’ll write some code to implement the language <a class="reference internal" href="first_server.html#language-implementation"><span class="std std-ref">a bit later</span></a>.  First though, let’s look at the structure of the solution.</p>
+<p>We’ll write some code to implement the language <a class="reference internal" href="ch2-first-server.html#language-implementation"><span class="std std-ref">a bit later</span></a>.  First though, let’s look at the structure of the solution.</p>
 <hr class="footnotes docutils" />
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id4" role="doc-footnote">
@@ -202,9 +202,10 @@ Goodbye Nellie
 <li class="toctree-l2"><a class="reference internal" href="#the-greet-language">The Greet Language</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="first_server.html">First Language Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing the Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="definition-reference.html">Definitions and References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch2-first-server.html">First Language Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch3-testing.html">Testing the Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch4-definition-reference.html">Extending the Server: Definitions and References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch4-definition-reference.html#installing-lark">Installing Lark</a></li>
 </ul>
 
 <div class="relations">
@@ -212,7 +213,7 @@ Goodbye Nellie
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">Adventures with the Language Server Protocol</a></li>
-      <li>Next: <a href="first_server.html" title="next chapter">A First Server</a></li>
+      <li>Next: <a href="ch2-first-server.html" title="next chapter">A First Server</a></li>
   </ul></li>
 </ul>
 </div>
@@ -246,7 +247,7 @@ Goodbye Nellie
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
-      <a href="_sources/intro.md.txt"
+      <a href="_sources/ch1-intro.md.txt"
           rel="nofollow">Page source</a>
     </div>
 

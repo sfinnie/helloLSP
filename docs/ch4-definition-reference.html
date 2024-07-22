@@ -13,7 +13,7 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Testing" href="testing.html" />
+    <link rel="prev" title="Testing" href="ch3-testing.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -38,8 +38,8 @@
 <li><p><a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references">Find References</a>: complement to above which indicates all the places a given symbol is referenced</p></li>
 </ul>
 <p>These aren’t relevant to <code class="docutils literal notranslate"><span class="pre">greet</span></code> in its current form: we don’t currently define things and refer to them later.  We could, though, extend the language to do that.  Here’s an example:</p>
-<div class="highlight-text notranslate" id="extended-greet-example"><div class="highlight"><pre><span></span>name: Bob
-name: Dolly
+<div class="highlight-text notranslate" id="extended-greet-example"><div class="highlight"><pre><span></span>Name: Bob
+Name: Dolly
 
 Goodbye Bob
 Hello Dolly
@@ -50,16 +50,16 @@ Hello Dolly
 <li><p>If the user right-clicks on “Bob” on the first line and selects “Find References”, then “Bob” in “Goodbye Bob” is highlighted</p></li>
 <li><p>If the user right-clicks on “Bob” in “Goodbye Bob” and selects “Go To Definition”, then they end up back at line 1.</p></li>
 </ul>
-<p>The same applies for Dolly obviously.  That seems pretty simple.  But getting there is going to mean a fair bit of a detour into how our language server parses and stores the input file.</p>
+<p>The same applies for Dolly obviously.  That seems pretty simple.  But getting there is going to mean a fair bit of a detour into how our language server parses and analyses the input file.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The LSP differentiates between <em>declaration</em> and <em>definition</em>.  A <em>declaration</em> is made when a symbol is introduced but not bound, for example <code class="docutils literal notranslate"><span class="pre">foo:</span> <span class="pre">str</span></code> in Python.  A <em>definition</em> both introduces a symbol and binds it to a value, e.g. <code class="docutils literal notranslate"><span class="pre">foo:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&quot;bar&quot;</span></code>.  Greet’s <code class="docutils literal notranslate"><span class="pre">name:</span></code> statements bind values for names, so definitions are appropriate here.</p>
+<p>The LSP differentiates between <em>declaration</em> and <em>definition</em>.  A <em>declaration</em> is made when a symbol is introduced but not bound to a value, for example <code class="docutils literal notranslate"><span class="pre">foo:</span> <span class="pre">str</span></code> in Python.  A <em>definition</em> both introduces a symbol and binds a value, e.g. <code class="docutils literal notranslate"><span class="pre">foo:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">&quot;bar&quot;</span></code>.  Greet’s <code class="docutils literal notranslate"><span class="pre">name:</span></code> statements bind values for names, so definitions are appropriate here.</p>
 </div>
 <section id="extending-the-language-grammar">
 <h2>Extending the Language Grammar<a class="headerlink" href="#extending-the-language-grammar" title="Permalink to this heading">¶</a></h2>
-<p>First off, let’s extend the <a class="reference internal" href="intro.html#greet-grammar"><span class="std std-ref">greet BNF Grammar</span></a> we originally created.</p>
+<p>First off, let’s extend the <a class="reference internal" href="ch1-intro.html#greet-grammar"><span class="std std-ref">greet BNF Grammar</span></a> we originally created.</p>
 <div class="highlight-bnf notranslate" id="extended-greet-bnf"><div class="highlight"><pre><span></span><span class="hll"><span class="linenos">1</span>    statement   <span class="o">::=</span> definition | greeting
-</span><span class="hll"><span class="linenos">2</span>    definition  <span class="o">::=</span> &#39;name:&#39; name
+</span><span class="hll"><span class="linenos">2</span>    definition  <span class="o">::=</span> &#39;Name:&#39; name
 </span><span class="linenos">3</span>    greeting    <span class="o">::=</span> salutation name
 <span class="linenos">4</span>    salutation  <span class="o">::=</span> &#39;Hello&#39; | &#39;Goodbye&#39;
 <span class="linenos">5</span>    name        <span class="o">::=</span> [a-zA-Z]+
@@ -68,13 +68,13 @@ Hello Dolly
 <p>The first two lines are additions to the original grammar (which otherwise remains the same).  They say:</p>
 <ul class="simple">
 <li><p>a <code class="docutils literal notranslate"><span class="pre">statement</span></code> in the language is either a <code class="docutils literal notranslate"><span class="pre">definition</span></code> or a <code class="docutils literal notranslate"><span class="pre">greeting</span></code> (line 1)</p></li>
-<li><p>a <code class="docutils literal notranslate"><span class="pre">definition</span></code> is the literal <code class="docutils literal notranslate"><span class="pre">name:</span></code> followed by a <code class="docutils literal notranslate"><span class="pre">name</span></code> (line 2)</p></li>
+<li><p>a <code class="docutils literal notranslate"><span class="pre">definition</span></code> is the literal <code class="docutils literal notranslate"><span class="pre">Name:</span></code> followed by a <code class="docutils literal notranslate"><span class="pre">name</span></code> (line 2)</p></li>
 </ul>
 <p>It’s worth noting a couple of things about the use of <code class="docutils literal notranslate"><span class="pre">name</span></code>:</p>
 <ol class="arabic">
 <li><p>both <code class="docutils literal notranslate"><span class="pre">definition</span></code> and <code class="docutils literal notranslate"><span class="pre">greeting</span></code> refer to the same term on line 5 of the grammar.  That makes sense: we don’t want different rules for a valid name when defining it vs using it.</p></li>
 <li><p>Notwithstanding that, the grammar says nothing about a greeting referencing a name that’s been defined.  Based on the grammar alone, the following would be valid:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> name: Bob
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span> Name: Bob
  Hello Dolly
 </pre></div>
 </div>
@@ -82,20 +82,49 @@ Hello Dolly
 </ol>
 <p>The grammar only specifies the language <em>syntax</em>.  It doesn’t say anything about its <em>semantics</em> - its <em>meaning</em>.  We haven’t had to deal with semantics up to this point.  As humans reading the language, we understand it would break our new rules to greet someone whose name hasn’t been defined.  We need to fnd a way to encode that.</p>
 </section>
+<section id="starting-with-an-end-in-mind">
+<h2>Starting with an end in mind<a class="headerlink" href="#starting-with-an-end-in-mind" title="Permalink to this heading">¶</a></h2>
+<p>Before we get into how to extend our code, it’s worth being clear on what we want from the output.  We want three things:</p>
+<ol class="arabic simple">
+<li><p>To ensure the file contents are valid, and, if not, report diagnostics as appropriate when we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> notification;</p></li>
+<li><p>To return the definition location when we receive a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_definition">textDocument/definition</a> request;</p></li>
+<li><p>To return the reference location(s) when we receive a <a class="reference external" href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_references">textDocument/references</a> request.</p></li>
+</ol>
+<p>We have an implementation of (1) in <a class="reference internal" href="ch2-first-server.html#regex-based-greet-parser"><span class="std std-ref">the parser we built in Chapter 2</span></a>.  We’ll need to extend it, as name definitions introduce a new failure mode.  That occurs if a greeting statement uses a name that isn’t defined.  We’ll come to that in a bit.</p>
+<p>Diagnostics are handled by notifications; we receive the <code class="docutils literal notranslate"><span class="pre">textDocument/didChange</span></code> and send back a <code class="docutils literal notranslate"><span class="pre">textDocument/diagnostic</span></code> notification. Definitions and References are both commands that expect a response.  Let’s start with <code class="docutils literal notranslate"><span class="pre">definition</span></code>.  Here’s its skeleton:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@greet_server</span><span class="o">.</span><span class="n">feature</span><span class="p">(</span><span class="n">TEXT_DOCUMENT_DEFINITION</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">definition</span><span class="p">(</span><span class="n">ls</span><span class="p">:</span> <span class="n">GreetLanguageServer</span><span class="p">,</span>  <span class="n">params</span><span class="p">:</span> <span class="n">DefinitionParams</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocationLink</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>To support definitions and lookups, we’ll need some form of data structure that lets us navigate from one place to another in the file.  Each requires us to process the source file.  It’s helpful to think of the output we need each time we process the file contents:</p>
+<ol class="arabic simple">
+<li><p>A collection of zero or more <code class="docutils literal notranslate"><span class="pre">Diagnostics</span></code>, each defining and describing an error in the file, and</p></li>
+<li><p>A way to map name references to their definitions, and vice-versa.</p></li>
+</ol>
+<p>The shape of Diagnostics are defined for us by the LSP and implemented by <code class="docutils literal notranslate"><span class="pre">lsprotocol.types.Diagnostic</span></code>.   We’ve seen it before in the <a class="reference internal" href="ch2-first-server.html#regex-based-greet-parser"><span class="std std-ref">initial parser</span></a>.</p>
+</section>
 <section id="bye-bye-regular-expressions-hello-parser-generator">
 <h2>Bye-bye regular expressions, hello parser-generator<a class="headerlink" href="#bye-bye-regular-expressions-hello-parser-generator" title="Permalink to this heading">¶</a></h2>
-<p>We <a class="reference internal" href="first_server.html#language-regex"><span class="std std-ref">implemented the original grammar</span></a> using a regular expression (regex).  As noted at the time, regexes are powerful but limited.  We could amend the regex to cover our enhanced grammar, but that has two limitations:</p>
+<p>We <a class="reference internal" href="ch2-first-server.html#language-regex"><span class="std std-ref">implemented the original grammar</span></a> using a regular expression (regex).  As noted at the time, regexes are powerful but limited.  We could amend the regex to cover our enhanced grammar, but that has two limitations:</p>
 <ol class="arabic simple">
 <li><p>It gets complicated.  Regexes are notorious for being “write only”, meaning that trying to read them is hard.  Our original grammar is already pushing the boundaries; adding our new grammar rules would take us firmly into inscrutable territory.</p></li>
 <li><p>We need the locations of tokens in the file.  For example, we need to know that “Bob” occupies columns 7, 8 and 9 on line 1 in the <a class="reference internal" href="#extended-greet-example">example</a> (assuming we start counting at column 1, not 0).  Regexes don’t give us an easy way to do that.</p></li>
 </ol>
-<p>We could hand-write a parser.  We could instead use a <a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_parser_generators">parser-generator</a> that takes a definition of our grammar and creates a parser for us.  There are good reasons to use either approach; we’ll use the latter.  There are <a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_parser_generators">many parser-generators available</a>.  I’ve chosen to use <a class="reference external" href="https://tree-sitter.github.io/">tree-sitter</a> for a number of reasons:</p>
+<p>We could hand-write a parser.  We could instead use a <a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_parser_generators">parser-generator</a> that takes a definition of our grammar and creates a parser for us.  There are good reasons to use either approach; we’ll use the latter.  There are <a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_parser_generators">many parser-generators available</a>.  I’ve chosen to use <a class="reference external" href="https://github.com/lark-parser/lark">Lark</a> for a number of reasons:</p>
 <ol class="arabic simple">
-<li><p>It’s fast. It was originally created for the <a class="reference external" href="https://github.com/atom">Atom</a> editor, specifically for parsing and syntax highlighting programming languages.</p></li>
-<li><p>It’s easy to use (after a bit of setup)</p></li>
-<li><p>It has python bindings, meaning it’s easy to interact with from Python</p></li>
+<li><p>It installs as a Python library, so setup is easy</p></li>
+<li><p>It’s easy to use</p></li>
+<li><p>A Lark grammar specification looks quite similar to our BNF definition.</p></li>
+<li><p>It’s <a class="reference external" href="https://lark-parser.readthedocs.io/en/latest/">well documented</a>.</p></li>
 </ol>
 </section>
+</section>
+<section id="installing-lark">
+<h1>Installing Lark<a class="headerlink" href="#installing-lark" title="Permalink to this heading">¶</a></h1>
+<p>Installation is easy:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>lark
+</pre></div>
+</div>
 </section>
 
 
@@ -117,21 +146,23 @@ Hello Dolly
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="first_server.html">First Language Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing the Server</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Definitions and References</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="ch1-intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch2-first-server.html">First Language Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ch3-testing.html">Testing the Server</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Extending the Server: Definitions and References</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#extending-the-language-grammar">Extending the Language Grammar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#starting-with-an-end-in-mind">Starting with an end in mind</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bye-bye-regular-expressions-hello-parser-generator">Bye-bye regular expressions, hello parser-generator</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="#installing-lark">Installing Lark</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="testing.html" title="previous chapter">Testing</a></li>
+      <li>Previous: <a href="ch3-testing.html" title="previous chapter">Testing</a></li>
   </ul></li>
 </ul>
 </div>
@@ -165,7 +196,7 @@ Hello Dolly
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
-      <a href="_sources/definition-reference.md.txt"
+      <a href="_sources/ch4-definition-reference.md.txt"
           rel="nofollow">Page source</a>
     </div>
 
